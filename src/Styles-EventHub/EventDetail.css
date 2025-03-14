@@ -1,0 +1,100 @@
+.event-detail-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .event-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .back-button {
+    margin-right: 10px;
+    padding: 5px 10px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    color: #1890ff;
+  }
+  
+  .event-banner {
+    height: 300px;
+    width: 100%;
+    border-radius: 10px;
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  
+  .event-banner-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    color: white;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+  }
+  
+  .event-banner-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .event-info-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+  }
+  
+  .event-description {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  }
+  
+  .event-sidebar {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  }
+  
+  .event-info-section {
+    margin-bottom: 15px;
+  }
+  
+  .event-info-section h3 {
+    font-size: 16px;
+    margin-bottom: 5px;
+    color: #666;
+  }
+  
+  .event-info-section p {
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .register-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #1890ff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .register-button:hover {
+    background-color: #0c7cd5;
+  }

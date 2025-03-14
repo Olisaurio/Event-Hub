@@ -1,0 +1,120 @@
+.event-carousel {
+    position: relative;
+    margin-bottom: 30px;
+    overflow: hidden;
+  }
+  
+  .event-list {
+    display: flex;
+    transition: transform 0.5s ease;
+    gap: 15px;
+  }
+  
+  .event-card {
+    min-width: 260px;
+    max-width: 260px;
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    margin-bottom: 5px;
+  }
+  
+  .event-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  }
+  
+  .event-image {
+    height: 150px;
+    background-size: cover;
+    background-position: center;
+  }
+  
+  .event-info {
+    padding: 15px;
+  }
+  
+  .event-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+  }
+  
+  .event-date {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+  }
+  
+  .event-category {
+    font-size: 12px;
+    color: #1890ff;
+    font-weight: 500;
+  }
+
+  /* Carousel Controls */
+.carousel-controls {
+    display: flex;
+    justify-content: space-between;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    padding: 0 10px;
+    z-index: 2;
+  }
+  
+  .carousel-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+  }
+  
+  .carousel-button:hover {
+    background-color: rgba(255, 255, 255, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Pagination */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 5px;
+  }
+  
+  .pagination-button, .pagination-arrow {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .pagination-button.active {
+    background-color: #1890ff;
+    color: white;
+    border-color: #1890ff;
+  }
+  
+  .pagination-button:hover, .pagination-arrow:hover {
+    background-color: #f0f0f0;
+  }

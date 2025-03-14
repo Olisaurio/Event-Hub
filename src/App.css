@@ -1,0 +1,51 @@
+.app-container {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  .main-content {
+    flex: 1;
+    margin-left: 250px;
+    padding: 20px;
+    overflow-x: hidden;
+  }
+
+  .page-title {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  /* Time Filters */
+  .time-filters {
+    display: flex;
+    overflow-x: auto;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+  }
+  
+  .time-filter-button {
+    padding: 8px 16px;
+    margin-right: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  
+  .time-filter-button.active {
+    background-color: #1890ff;
+    color: white;
+    border-color: #1890ff;
+  }
+  
+  .see-all-button {
+    padding: 8px 16px;
+    background-color: transparent;
+    border: none;
+    color: #1890ff;
+    cursor: pointer;
+    white-space: nowrap;
+  }
