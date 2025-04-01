@@ -4,29 +4,29 @@ import { useNavigate } from 'react-router-dom';
 import "../Styles-EventHub/Carousel.css"
 
 const EventCarousel = ({ events }) => {
-  // Asegúrate de que events es un array y tiene elementos
+  // Validate events prop
   if (!events || !Array.isArray(events) || events.length === 0) {
-    console.log("No events provided to carousel");
     return <div>No events available</div>;
   }
-  
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
   const carouselRef = useRef(null);
-  const itemsPerView = 4; // Adjust based on screen size
-  const maxIndex = Math.max(0, events.length - itemsPerView);
   
+  const itemsPerView = 4;  // Adjust based on screen size
+  const maxIndex = Math.max(0, events.length - itemsPerView);
+
   // Auto-scroll effect
   useEffect(() => {
     const interval = setInterval(() => {
       if (!transitioning) {
         handleNext();
       }
-    }, 3000); // Change slides every 3 seconds
-    
+    }, 5000);  // Changed to 5 seconds for smoother experience
+   
     return () => clearInterval(interval);
   }, [currentIndex, transitioning]);
-  
+
   const handlePrev = () => {
     if (currentIndex > 0 && !transitioning) {
       setTransitioning(true);
@@ -34,44 +34,82 @@ const EventCarousel = ({ events }) => {
       setTimeout(() => setTransitioning(false), 500);
     }
   };
-  
+
   const handleNext = () => {
     if (currentIndex < maxIndex && !transitioning) {
       setTransitioning(true);
       setCurrentIndex(prevIndex => prevIndex + 1);
       setTimeout(() => setTransitioning(false), 500);
     } else if (currentIndex >= maxIndex && !transitioning) {
-      // Reset to beginning when reached the end
       setTransitioning(true);
       setCurrentIndex(0);
       setTimeout(() => setTransitioning(false), 500);
     }
   };
-  
+
   // Calculate translation for smooth scrolling
-  const translateX = -currentIndex * (260 + 15); // card width + gap
-  
+  const translateX = -currentIndex * (260);  // Adjusted for better performance
+
   return (
-    <div className="event-carousel">
-      <div className="carousel-controls">
-        <button className="carousel-button" onClick={handlePrev}>
+    <div 
+      className="event-carousel" 
+      style={{ 
+        position: 'relative', 
+        overflow: 'hidden', 
+        width: '100%' 
+      }}
+    >
+      <div 
+        className="carousel-controls" 
+        style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          position: 'absolute', 
+          top: '50%', 
+          width: '100%', 
+          zIndex: 10 
+        }}
+      >
+        <button 
+          onClick={handlePrev}
+          style={{
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            color: 'white',
+            border: 'none',
+            padding: '10px',
+            cursor: 'pointer'
+          }}
+        >
           &lt;
         </button>
-        <button className="carousel-button" onClick={handleNext}>
+        <button 
+          onClick={handleNext}
+          style={{
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            color: 'white',
+            border: 'none',
+            padding: '10px',
+            cursor: 'pointer'
+          }}
+        >
           &gt;
         </button>
       </div>
-      
-      <div className="event-list" ref={carouselRef} style={{
-        transform: `translateX(${translateX}px)`,
-      }}>
-        {events.map(event => {
-          // Asegurarnos de que cada evento tiene un id y una imagen
-          if (!event.id) console.warn("Event missing ID:", event);
-          if (!event.image) console.warn("Event missing image:", event.id);
-          
-          return <EventCard key={event.id} event={event} />
-        })}
+     
+      <div 
+        ref={carouselRef} 
+        style={{
+          display: 'flex',
+          transition: 'transform 0.5s ease',
+          transform: `translateX(${translateX}px)`
+        }}
+      >
+        {events.map(event => (
+          <EventCard 
+            key={event.id || Math.random()} 
+            event={event} 
+          />
+        ))}
       </div>
     </div>
   );

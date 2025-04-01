@@ -1,0 +1,107 @@
+.event-detail-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    background-color: #f7f7f7;
+  }
+  
+  .event-hero {
+    position: relative;
+    margin-bottom: 30px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  
+  .event-hero-image {
+    width: 100%;
+    height: 400px;
+  }
+  
+  .event-hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .event-hero-title {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    padding: 15px 20px;
+  }
+  
+  .event-hero-title h1 {
+    margin: 0;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  }
+  
+  /* Rest of the previous CSS remains the same */
+  
+  .sub-events-section {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 25px;
+    margin-top: 20px;
+  }
+  
+  .sub-events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+  
+  .sub-event-card {
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+  }
+  
+  .sub-event-card:hover {
+    transform: scale(1.03);
+  }
+  
+  .sub-event-header {
+    background-color: #333;
+    color: white;
+    padding: 10px 15px;
+  }
+  
+  .sub-event-header h3 {
+    margin: 0;
+    font-size: 1.2em;
+  }
+  
+  .sub-event-details {
+    padding: 15px;
+  }
+  
+  .sub-event-detail-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+  }
+  
+  .sub-event-detail-item:last-child {
+    border-bottom: none;
+  }
+  
+  .sub-event-label {
+    font-weight: bold;
+    color: #555;
+  }
+  
+  .sub-event-value {
+    color: #333;
+    text-align: right;
+  }

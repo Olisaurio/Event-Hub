@@ -1,84 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/sidebar";
 import EventCarousel from "../../components/EventCarousel";
 import Header from "../../components/Header";
 
 const EventHub = () => {
-  // Datos de ejemplo para los eventos
-  const events = [
-    {
-      id: 1,
-      title: "Summer Music Festival",
-      date: "Jun 15 - 17, 2022",
-      category: "Music",
-      image: "/images/summer-festival.jpg",
-    },
-    {
-      id: 2,
-      title: "Tech Conference",
-      date: "Jul 8, 2022",
-      category: "Technology",
-      image: "/images/tech-conference.jpg",
-    },
-    {
-      id: 3,
-      title: "Farmers Market",
-      date: "Every Sunday",
-      category: "Food & Drink",
-      image: "/images/farmers-market.jpg",
-    },
-    {
-      id: 4,
-      title: "Comedy Show",
-      date: "Aug 2, 2022",
-      category: "Arts",
-      image: "/images/comedy-show.jpg",
-    },
-    {
-      id: 5,
-      title: "Wine Tasting",
-      date: "Sep 12, 2022",
-      category: "Health & Wellness",
-      image: "/images/wine-tasting.jpg",
-    },
-    {
-      id: 6,
-      title: "Summer Music Festival",
-      date: "Jun 15 - 17, 2022",
-      category: "Music",
-      image: "/images/summer-festival.jpg",
-    },
-    {
-      id: 7,
-      title: "Tech Conference",
-      date: "Jul 8, 2022",
-      category: "Technology",
-      image: "/images/tech-conference.jpg",
-    },
-    {
-      id: 8,
-      title: "Farmers Market",
-      date: "Every Sunday",
-      category: "Food & Drink",
-      image: "/images/farmers-market.jpg",
-    },
-    {
-      id: 9,
-      title: "Comedy Show",
-      date: "Aug 2, 2022",
-      category: "Arts",
-      image: "/images/comedy-show.jpg",
-    },
-    {
-      id: 10,
-      title: "Wine Tasting",
-      date: "Sep 12, 2022",
-      category: "Health & Wellness",
-      image: "/images/wine-tasting.jpg",
-    },
-  ];
+  const [events, setEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Filtros de tiempo disponibles
   const timeFilters = [
     { id: "today", label: "Today" },
     { id: "tomorrow", label: "Tomorrow" },
@@ -90,19 +19,105 @@ const EventHub = () => {
   const [activeFilter, setActiveFilter] = useState("today");
   const [activePage, setActivePage] = useState(1);
 
+  const formatEventDate = (dateObj) => {
+    if (!dateObj || !dateObj.start) return 'Fecha no especificada';
+    
+    try {
+      const startDate = new Date(dateObj.start);
+      const formatOptions = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      };
+      
+      return startDate.toLocaleDateString('es-ES', formatOptions);
+    } catch (error) {
+      console.error('Error al formatear fecha:', error);
+      return 'Fecha inválida';
+    }
+  };
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/events', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Debugging: Log raw event data
+        console.log('Raw Events:', data);
+
+        // More comprehensive event mapping
+        const formattedEvents = data.map(event => {
+          console.log('Processing event:', event); // Log each event for inspection
+
+          return {
+            id: event.id || Math.random().toString(), // Fallback ID
+            eventName: event.eventName || 'Untitled Event', // Fallback name
+            date: event.date || { start: null }, // Fallback date
+            type: event.type || 'Uncategorized', // Fallback type
+            image: event.image || "https://placehold.co/300x150", // Fallback image
+            price: event.price || { amount: 0, currency: 'COP' }, // Fallback price
+            originalEvent: event // Keep original event data
+          };
+        });
+
+        console.log('Formatted Events:', formattedEvents); // Log formatted events
+
+        setEvents(formattedEvents);
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Error fetching events:', err);
+        setError(err.message);
+        setIsLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="app-container">
+        <Sidebar />
+        <div className="main-content">
+          <Header />
+          <div>Cargando eventos...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar error si ocurre
+  if (error) {
+    return (
+      <div className="app-container">
+        <Sidebar />
+        <div className="main-content">
+          <Header />
+          <div>Error: {error}</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="app-container">
-      {/* Sidebar */}
       <Sidebar />
-
       <div className="main-content">
-        {/* Header */}
         <Header />
-
-        {/* Page Title */}
         <h1 className="page-title">Discover the best events in your city</h1>
 
-        {/* Time Filters */}
         <div className="time-filters">
           {timeFilters.map((filter) => (
             <button
@@ -118,11 +133,8 @@ const EventHub = () => {
           <button className="see-all-button">See all</button>
         </div>
 
-        {/* Event Carousel Component */}
+        {/* Pasar eventos cargados de la API */}
         <EventCarousel events={events} />
-
-        {/* Pagination */}
-
       </div>
     </div>
   );

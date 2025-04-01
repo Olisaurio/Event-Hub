@@ -4,7 +4,9 @@ import { Login } from './assets/Login/Login';
 import { Register } from './assets/Register/Register';
 import EventHub from './assets/EventHub/EventHub';
 import EventDetail from './assets/EventHub/EventDetail';
+
 import "./App.css"
+import CreateEvent from './components/CreateEvent ';
 
 
 
@@ -16,6 +18,7 @@ function App() {
         <Route path="/Register" element={<Register />} />
         <Route path="/EventHub" element={<EventHub />} />
         <Route path="/event/:id" element={<EventDetail />} />
+        <Route path="/create-event" element={<CreateEvent />} />
       </Routes>
     </BrowserRouter>
   );
