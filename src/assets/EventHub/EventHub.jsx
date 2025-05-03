@@ -3,109 +3,90 @@ import Sidebar from "../../components/sidebar";
 import EventCarousel from "../../components/EventCarousel";
 import Header from "../../components/Header";
 
+// *** Lista de Categorías (igual que en CreateEvent) ***
+const availableCategories = [
+    "Música", "Arte y Cultura", "Comida y Bebida", "Deportes", 
+    "Negocios", "Tecnología", "Aire Libre", "Comunidad", "Familia", 
+    "Cine", "Moda", "Educación", "Salud y Bienestar", "Otros"
+];
+
 const EventHub = () => {
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(""); // Estado para la categoría seleccionada
 
-  const timeFilters = [
-    { id: "today", label: "Today" },
-    { id: "tomorrow", label: "Tomorrow" },
-    { id: "weekend", label: "This weekend" },
-    { id: "next-week", label: "Next week" },
-    { id: "month", label: "This month" },
-  ];
-
-  const [activeFilter, setActiveFilter] = useState("today");
-  const [activePage, setActivePage] = useState(1);
-
-  const formatEventDate = (dateObj) => {
-    if (!dateObj || !dateObj.start) return 'Fecha no especificada';
-    
-    try {
-      const startDate = new Date(dateObj.start);
-      const formatOptions = {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      };
-      
-      return startDate.toLocaleDateString('es-ES', formatOptions);
-    } catch (error) {
-      console.error('Error al formatear fecha:', error);
-      return 'Fecha inválida';
-    }
-  };
-
+  // --- Fetch Events (Actualizado para filtrar por categoría) ---
   useEffect(() => {
     const fetchEvents = async () => {
-      try {
-        const response = await fetch('http://localhost:3001/events', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
+      setIsLoading(true);
+      setError(null);
+      let url = "http://localhost:3001/events";
+      
+      // Añadir parámetro de categoría si está seleccionada
+      if (selectedCategory) {
+        url += `?category=${encodeURIComponent(selectedCategory)}`;
+        console.log(`Fetching events for category: ${selectedCategory}`);
+      } else {
+        console.log("Fetching all events");
+      }
 
+      try {
+        const response = await fetch(url);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-
         const data = await response.json();
         
-        // Debugging: Log raw event data
-        console.log('Raw Events:', data);
-
-        // More comprehensive event mapping
-        const formattedEvents = data.map(event => {
-          console.log('Processing event:', event); // Log each event for inspection
-
-          return {
-            id: event.id || Math.random().toString(), // Fallback ID
-            eventName: event.eventName || 'Untitled Event', // Fallback name
-            date: event.date || { start: null }, // Fallback date
-            type: event.type || 'Uncategorized', // Fallback type
-            image: event.image || "https://placehold.co/300x150", // Fallback image
-            price: event.price || { amount: 0, currency: 'COP' }, // Fallback price
-            originalEvent: event // Keep original event data
-          };
-        });
-
-        console.log('Formatted Events:', formattedEvents); // Log formatted events
+        // Mapeo simple (asumiendo que la API devuelve datos consistentes ahora)
+        const formattedEvents = data.map(event => ({
+          id: event.id,
+          eventName: event.eventName,
+          date: event.date, 
+          type: event.type, // Podríamos usar categories[0] si quisiéramos mostrar una
+          // Usar la primera imagen principal como imagen del carrusel
+          image: event.mainImages && event.mainImages.length > 0 ? event.mainImages[0] : "https://placehold.co/300x150?text=Sin+Imagen", 
+          price: event.price, 
+          originalEvent: event 
+        }));
 
         setEvents(formattedEvents);
-        setIsLoading(false);
       } catch (err) {
-        console.error('Error fetching events:', err);
+        console.error("Error fetching events:", err);
         setError(err.message);
+        setEvents([]); // Limpiar eventos en caso de error
+      } finally {
         setIsLoading(false);
       }
     };
 
     fetchEvents();
-  }, []);
+  }, [selectedCategory]); // *** Re-ejecutar fetch cuando selectedCategory cambie ***
 
+  // Handler para cambiar la categoría seleccionada
+  const handleCategoryChange = (event) => {
+    setSelectedCategory(event.target.value);
+  };
+
+  // Componente de carga y error (sin cambios)
   if (isLoading) {
     return (
       <div className="app-container">
         <Sidebar />
         <div className="main-content">
           <Header />
-          <div>Cargando eventos...</div>
+          <div className="loading-container"><div className="loading-spinner"></div>Cargando eventos...</div>
         </div>
       </div>
     );
   }
-
-  // Mostrar error si ocurre
   if (error) {
     return (
       <div className="app-container">
         <Sidebar />
         <div className="main-content">
           <Header />
-          <div>Error: {error}</div>
+          <div className="error-container">Error al cargar eventos: {error}</div>
         </div>
       </div>
     );
@@ -116,28 +97,37 @@ const EventHub = () => {
       <Sidebar />
       <div className="main-content">
         <Header />
-        <h1 className="page-title">Discover the best events in your city</h1>
+        <h1 className="page-title">Descubre los mejores eventos</h1>
 
-        <div className="time-filters">
-          {timeFilters.map((filter) => (
-            <button
-              key={filter.id}
-              className={`time-filter-button ${
-                activeFilter === filter.id ? "active" : ""
-              }`}
-              onClick={() => setActiveFilter(filter.id)}
-            >
-              {filter.label}
-            </button>
-          ))}
-          <button className="see-all-button">See all</button>
+        {/* *** Filtro de Categorías *** */}
+        <div className="category-filter-container">
+          <label htmlFor="categoryFilter">Filtrar por Categoría:</label>
+          <select 
+            id="categoryFilter" 
+            value={selectedCategory} 
+            onChange={handleCategoryChange}
+            className="category-select"
+          >
+            <option value="">Todas las Categorías</option>
+            {availableCategories.map(category => (
+              <option key={category} value={category}>{category}</option>
+            ))}
+          </select>
         </div>
 
-        {/* Pasar eventos cargados de la API */}
-        <EventCarousel events={events} />
+        {/* Carrusel de Eventos */}
+        {events.length > 0 ? (
+          <EventCarousel events={events} />
+        ) : (
+          <div className="no-events-message">
+            No se encontraron eventos {selectedCategory ? `para la categoría "${selectedCategory}"` : ""}.
+          </div>
+        )}
+        
       </div>
     </div>
   );
 };
 
 export default EventHub;
+

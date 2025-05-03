@@ -14,8 +14,8 @@ const Header = () => {
             type="text"
             placeholder="Search"
             className="search-input"
-          />
-          <span className="search-icon">🔍</span>
+            />
+          
         </div>
         <button className="notification-button">🔔</button>
         <div className="profile-button">
