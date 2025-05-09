@@ -22,7 +22,7 @@ const EventCarousel = ({ events }) => {
       if (!transitioning) {
         handleNext();
       }
-    }, 5000);  // Changed to 5 seconds for smoother experience
+    }, 3000);  // Changed to 5 seconds for smoother experience
    
     return () => clearInterval(interval);
   }, [currentIndex, transitioning]);
@@ -30,7 +30,7 @@ const EventCarousel = ({ events }) => {
   const handlePrev = () => {
     if (currentIndex > 0 && !transitioning) {
       setTransitioning(true);
-      setCurrentIndex(prevIndex => prevIndex - 1);
+      setCurrentIndex(prevIndex => prevIndex - 2);
       setTimeout(() => setTransitioning(false), 500);
     }
   };

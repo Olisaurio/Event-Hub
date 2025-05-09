@@ -1,0 +1,75 @@
+/* VerticalRecommendationsCarousel.css */
+.vertical-carousel-container {
+  width: 100%; /* Ocupará el espacio asignado por el grid parent */
+  padding: 15px;
+  background-color: #f8f9fa; /* Un fondo claro para destacar */
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  height: fit-content; /* Ajustar altura al contenido */
+}
+
+.recommendations-title {
+  font-size: 1.2em;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.recommendation-item {
+  padding: 10px 5px; /* Espacio alrededor de cada item */
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-color); /* Separador sutil */
+  display: flex !important; /* Forzar flex para alinear imagen y texto */
+  align-items: center;
+  gap: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.recommendation-item:last-child {
+  border-bottom: none;
+}
+
+.recommendation-item:hover {
+  background-color: #e9ecef;
+}
+
+.recommendation-image {
+  width: 80px; /* Tamaño fijo para la imagen */
+  height: 60px;
+  object-fit: cover;
+  border-radius: var(--border-radius);
+  flex-shrink: 0; /* Evitar que la imagen se encoja */
+}
+
+.recommendation-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden; /* Para nombres largos */
+}
+
+.recommendation-name {
+  font-size: 0.9em;
+  font-weight: 500;
+  color: var(--text-color);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recommendations-placeholder {
+  padding: 20px;
+  text-align: center;
+  color: var(--light-text);
+  font-style: italic;
+}
+
+/* Ajustes para el slider vertical de react-slick */
+.slick-slider.slick-vertical .slick-slide {
+  border: none; /* Quitar bordes que pueda añadir react-slick */
+  padding: 5px 0; /* Espacio vertical entre slides */
+}
+
