@@ -1,14 +1,10 @@
-
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-DoubleSliderForm
-import EventHub from './assets/EventHub/EventHub';
-import EventDetail from './assets/EventHub/EventDetail';
-
-import "./App.css"
-import CreateEvent from './components/CreateEvent ';
+import EventHub from './Pages-EventHub/EventHub';
+import EventDetail from './Pages-EventHub/EventDetail';
+import EventsListPage from './Pages-EventHub/EventsListPage';
+import CreateEvent from './components/CreateEvent.jsx';
 import DoubleSliderForm from './assets/DoubleSliderForm/DoubleSliderForm';
-
-
+import "./App.css";
 
 function App() {
   return (
@@ -17,6 +13,7 @@ function App() {
         <Route path="/" element={<DoubleSliderForm />} />
         <Route path="/EventHub" element={<EventHub />} />
         <Route path="/event/:id" element={<EventDetail />} />
+        <Route path="/events" element={<EventsListPage />} /> 
         <Route path="/create-event" element={<CreateEvent />} />
       </Routes>
     </BrowserRouter>
@@ -24,3 +21,4 @@ function App() {
 }
 
 export default App;
+

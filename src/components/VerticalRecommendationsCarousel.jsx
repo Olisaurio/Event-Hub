@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'; // Importar Link
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import '../Styles/VerticalRecommendationsCarousel.css';
+import '../Components-styles/VerticalRecommendationsCarousel.css'; // Actualizado
 
 const VerticalRecommendationsCarousel = ({ similarEvents }) => {
   if (!similarEvents || similarEvents.length === 0) {
@@ -45,3 +45,4 @@ const VerticalRecommendationsCarousel = ({ similarEvents }) => {
 };
 
 export default VerticalRecommendationsCarousel;
+

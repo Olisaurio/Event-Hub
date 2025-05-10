@@ -1,5 +1,5 @@
 import React from 'react';
-import "../Styles-EventHub/Header.css"
+import "../Components-styles/Header.css"; // Actualizado
 
 const Header = () => {
   return (
