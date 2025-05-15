@@ -10,11 +10,12 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<DoubleSliderForm />} />
+        <Route path="/" element={<DoubleSliderForm />} /> {/* This component handles both Login and Register */}
         <Route path="/EventHub" element={<EventHub />} />
         <Route path="/event/:id" element={<EventDetail />} />
         <Route path="/events" element={<EventsListPage />} /> 
         <Route path="/create-event" element={<CreateEvent />} />
+        {/* Las rutas /login y /register ya no son necesarias ya que DoubleSliderForm maneja ambas funcionalidades */}
       </Routes>
     </BrowserRouter>
   );

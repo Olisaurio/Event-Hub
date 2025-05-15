@@ -311,3 +311,49 @@ button.ghost:hover i.login {
 .social-container a:hover {
   border: 1px solid #4bb6b7;
 }
+/* Estilos para el mensaje emergente de error */
+.popup-error-message {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ff4d4f; /* Color rojo para errores */
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000; /* Asegurar que esté por encima de otros elementos */
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  text-align: center;
+  opacity: 1;
+  transition: opacity 0.5s ease-out;
+}
+
+/* Estilo para errores de validación estáticos debajo de los inputs */
+.static-error {
+    color: red;
+    font-size: 0.8em;
+    text-align: left;
+    width: 100%;
+    padding-left: 5px; /* Alineación con el input */
+    margin-top: -5px; /* Acercar al input */
+    margin-bottom: 8px; /* Espacio antes del siguiente elemento */
+}
+
+/* Estilo para inputs con error de validación */
+.input-error {
+  border: 1px solid red !important; /* Sobrescribir otros bordes */
+}
+
+/* Asegurar que el contenedor principal no oculte el popup si tiene overflow: hidden */
+.DoubleSliderForm {
+  /* ... otros estilos ... */
+  overflow: visible; /* Permitir que el popup se muestre fuera de los límites si es necesario */
+}
+
+/* Ajustes para el contenedor del formulario si el popup está activo */
+.container.popup-active {
+  filter: blur(2px); /* Opcional: desenfocar el fondo cuando el popup está activo */
+}
+
