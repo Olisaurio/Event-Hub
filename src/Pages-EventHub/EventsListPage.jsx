@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import CategoryFilterBar from '../components/CategoryFilterBar';
 import EventCard from '../components/EventCard';
-import '../EventHub-Styles/EventsListPage.css'; // Actualizado
+import '../EventHub-Styles/EventsListPage.css';
 
 // Función para parsear query params de la URL
 function useQuery() {
@@ -23,18 +23,14 @@ const EventsListPage = () => {
   const [selectedCategory, setSelectedCategory] = useState(query.get('category') || 'all');
   const [priceFilter, setPriceFilter] = useState('all'); // 'all', 'free', 'paid'
   const [maxPrice, setMaxPrice] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState('');
-  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedType, setSelectedType] = useState('');
 
-  const [departments, setDepartments] = useState([]);
-  const [cities, setCities] = useState([]);
-
-  // Cargar eventos y datos de ubicación iniciales
+  // Cargar eventos desde la API
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:3001/events');
+        const response = await fetch('https://backendeventhub.onrender.com/api/events');
         if (!response.ok) throw new Error('Failed to fetch events');
         const data = await response.json();
         setEvents(data);
@@ -47,19 +43,7 @@ const EventsListPage = () => {
       }
     };
 
-    const fetchLocations = async () => {
-      try {
-        const response = await fetch('http://localhost:3001/locations');
-        if (!response.ok) throw new Error('Failed to fetch locations');
-        const data = await response.json();
-        setDepartments(data.map(dep => dep.department));
-      } catch (err) {
-        console.error("Error fetching locations:", err);
-      }
-    };
-
     fetchEvents();
-    fetchLocations();
   }, []);
 
   useEffect(() => {
@@ -76,44 +60,20 @@ const EventsListPage = () => {
     }
 
     if (priceFilter === 'free') {
-      tempEvents = tempEvents.filter(event => event.ticketType === 'free' || (event.price && event.price.amount === 0));
+      tempEvents = tempEvents.filter(event => event.ticketType === 'Gratis' || (event.price && event.price.amount === 0));
     } else if (priceFilter === 'paid') {
-      tempEvents = tempEvents.filter(event => event.ticketType === 'paid' && event.price && event.price.amount > 0);
+      tempEvents = tempEvents.filter(event => event.ticketType === 'Pago' && event.price && event.price.amount > 0);
       if (maxPrice && !isNaN(parseFloat(maxPrice))) {
         tempEvents = tempEvents.filter(event => event.price.amount <= parseFloat(maxPrice));
       }
     }
 
-    if (selectedDepartment) {
-      tempEvents = tempEvents.filter(event => event.location && event.location.department === selectedDepartment);
-    }
-
-    if (selectedCity) {
-      tempEvents = tempEvents.filter(event => event.location && event.location.city === selectedCity);
+    if (selectedType) {
+      tempEvents = tempEvents.filter(event => event.type === selectedType);
     }
 
     setFilteredEvents(tempEvents);
-  }, [events, selectedCategory, priceFilter, maxPrice, selectedDepartment, selectedCity]);
-
-  useEffect(() => {
-    if (selectedDepartment) {
-      const fetchCitiesForDepartment = async () => {
-        try {
-          const response = await fetch('http://localhost:3001/locations');
-          const allLocations = await response.json();
-          const departmentData = allLocations.find(dep => dep.department === selectedDepartment);
-          setCities(departmentData ? departmentData.cities : []);
-        } catch (err) {
-          console.error("Error fetching cities for department:", err);
-          setCities([]);
-        }
-      };
-      fetchCitiesForDepartment();
-    } else {
-      setCities([]);
-    }
-    setSelectedCity('');
-  }, [selectedDepartment]);
+  }, [events, selectedCategory, priceFilter, maxPrice, selectedType]);
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
@@ -134,6 +94,8 @@ const EventsListPage = () => {
     { name: 'Negocios', id: 'Negocios' },
     { name: 'Tecnología', id: 'Tecnología' },
   ];
+
+  const eventTypes = ['simple', 'recurrente', 'multi-sesión'];
 
   if (loading) return <div className="events-list-page-loading">Cargando eventos...</div>;
   if (error) return <div className="events-list-page-error">Error al cargar eventos: {error}</div>;
@@ -172,29 +134,24 @@ const EventsListPage = () => {
                   id="maxPrice" 
                   value={maxPrice} 
                   onChange={(e) => setMaxPrice(e.target.value)} 
-                  placeholder="Ej: 50"
+                  placeholder="Ej: 50000"
                 />
               </div>
             )}
           </div>
 
-          <div className="filter-group location-filter">
-            <h4>Ubicación</h4>
-            <label htmlFor="departmentFilter">Departamento:</label>
-            <select id="departmentFilter" value={selectedDepartment} onChange={(e) => setSelectedDepartment(e.target.value)}>
+          <div className="filter-group type-filter">
+            <h4>Tipo de Evento</h4>
+            <select 
+              value={selectedType} 
+              onChange={(e) => setSelectedType(e.target.value)}
+              className="type-select"
+            >
               <option value="">Todos</option>
-              {departments.map(dep => <option key={dep} value={dep}>{dep}</option>)}
+              {eventTypes.map(type => (
+                <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
+              ))}
             </select>
-
-            {selectedDepartment && cities.length > 0 && (
-              <>
-                <label htmlFor="cityFilter">Ciudad:</label>
-                <select id="cityFilter" value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)}>
-                  <option value="">Todas</option>
-                  {cities.map(city => <option key={city} value={city}>{city}</option>)}
-                </select>
-              </>
-            )}
           </div>
         </aside>
 
@@ -202,7 +159,7 @@ const EventsListPage = () => {
           {filteredEvents.length > 0 ? (
             <div className="events-grid">
               {filteredEvents.map(event => (
-                <EventCard key={event.id} event={event} /> 
+                <EventCard key={event._id} event={event} /> 
               ))}
             </div>
           ) : (
@@ -215,4 +172,3 @@ const EventsListPage = () => {
 };
 
 export default EventsListPage;
-

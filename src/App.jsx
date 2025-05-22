@@ -15,7 +15,6 @@ function App() {
         <Route path="/event/:id" element={<EventDetail />} />
         <Route path="/events" element={<EventsListPage />} /> 
         <Route path="/create-event" element={<CreateEvent />} />
-        {/* Las rutas /login y /register ya no son necesarias ya que DoubleSliderForm maneja ambas funcionalidades */}
       </Routes>
     </BrowserRouter>
   );

@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // EventCard Component
 const EventCard = ({ event }) => {
   const navigate = useNavigate();
 
-  const formatDateRange = (dateObj) => {
-    if (!dateObj || !dateObj.start) return 'Date not specified';
+  const formatDateRange = (start, end) => {
+    if (!start) return 'Fecha no especificada';
     try {
-      const startDate = new Date(dateObj.start);
-      const endDate = dateObj.end ? new Date(dateObj.end) : null;
+      const startDate = new Date(start);
+      const endDate = end ? new Date(end) : null;
       const formatOptions = {
         day: 'numeric',
         month: 'short',
@@ -24,30 +24,33 @@ const EventCard = ({ event }) => {
       return startDate.toLocaleDateString('es-ES', formatOptions);
     } catch (error) {
       console.error('Error al formatear fecha:', error);
-      return 'Invalid Date';
+      return 'Fecha inválida';
     }
   };
 
   const formatPrice = (priceObj) => {
-    if (!priceObj || !priceObj.amount) return 'Free';
+    if (!priceObj || !priceObj.amount) return 'Gratis';
     return `${priceObj.amount} ${priceObj.currency}`;
   };
 
   const handleCardClick = () => {
-    navigate(`/event/${event.id}`, {
+    navigate(`/event/${event._id}`, {
       state: { event: event }
     });
   };
 
-  // Fallback image with consistent dimensions
-  const imageUrl = event.image || "https://placehold.co/300x150";
+  // Obtener la primera imagen principal si existe
+  const imageUrl = event.mainImages && event.mainImages.length > 0 
+    ? event.mainImages[0].url 
+    : "https://placehold.co/300x150";
 
   return (
     <div 
       className="event-card" 
       onClick={handleCardClick}
       style={{
-        width: '250px',
+        width: '100%',
+        maxWidth: '300px',
         margin: '10px',
         border: '1px solid #eee',
         borderRadius: '8px',
@@ -72,9 +75,12 @@ const EventCard = ({ event }) => {
         <h3 style={{ 
           margin: '0 0 8px 0', 
           fontSize: '16px', 
-          fontWeight: 'bold' 
+          fontWeight: 'bold',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
         }}>
-          {event.eventName || 'Untitled Event'}
+          {event.title || 'Evento sin título'}
         </h3>
         
         <div style={{ 
@@ -87,7 +93,7 @@ const EventCard = ({ event }) => {
             color: '#666', 
             fontSize: '14px' 
           }}>
-            {formatDateRange(event.date)}
+            {formatDateRange(event.start, event.end)}
           </p>
           
           <p style={{ 
@@ -103,24 +109,59 @@ const EventCard = ({ event }) => {
         <p style={{ 
           margin: '0', 
           color: '#888', 
-          fontSize: '12px' 
+          fontSize: '12px',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
         }}>
-          {event.type || 'Uncategorized'}
+          {event.location?.address || 'Ubicación no especificada'}
         </p>
+
+        {event.categories && event.categories.length > 0 && (
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            marginTop: '8px',
+            gap: '4px'
+          }}>
+            {event.categories.slice(0, 2).map((category, index) => (
+              <span key={index} style={{
+                backgroundColor: '#f0f0f0',
+                color: '#666',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                fontSize: '10px'
+              }}>
+                {category}
+              </span>
+            ))}
+            {event.categories.length > 2 && (
+              <span style={{
+                backgroundColor: '#f0f0f0',
+                color: '#666',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                fontSize: '10px'
+              }}>
+                +{event.categories.length - 2}
+              </span>
+            )}
+          </div>
+        )}
       </div>
       
-      {event.status === 'draft' && (
+      {event.privacy === 'Privado' && (
         <div style={{
           position: 'absolute',
           top: '10px',
           right: '10px',
-          backgroundColor: 'orange',
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
           color: 'white',
           padding: '3px 8px',
           borderRadius: '4px',
           fontSize: '12px'
         }}>
-          Draft
+          Privado
         </div>
       )}
     </div>
