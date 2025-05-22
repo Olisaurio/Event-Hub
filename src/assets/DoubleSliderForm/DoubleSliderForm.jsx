@@ -113,7 +113,8 @@ const DoubleSliderForm = () => {
       // Guardar info de usuario en localStorage
       localStorage.setItem("userName", username);
       localStorage.setItem("role", userRole);
-      
+      localStorage.setItem("role", userRole);
+
 
       window.location.href = "/EventHub";
     } catch (error) {

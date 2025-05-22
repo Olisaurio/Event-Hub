@@ -546,11 +546,16 @@ const CreateEvent = () => {
 
       console.log("Payload to send:", JSON.stringify(payload, null, 2));
 
-      const response = await fetch('http://localhost:8070/api/events', { 
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      const token = localStorage.getItem("token"); // Asegúrate de que el token esté guardado con esta clave
+
+const response = await fetch('https://backendeventhub.onrender.com/api/events', { 
+  method: 'POST',
+  headers: { 
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}` // Agregas el token aquí
+  },
+  body: JSON.stringify(payload),
+});
 
       if (!response.ok) {
         const errorData = await response.json();
