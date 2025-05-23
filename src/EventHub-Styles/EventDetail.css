@@ -9,7 +9,7 @@ body {
 /* Event Header */
 .event-header {
     background: linear-gradient(to right, #3b82f6, #2563eb);
-    height: 300px;
+    height: 350px;
     position: relative;
     color: white;
     margin-bottom: 2rem;

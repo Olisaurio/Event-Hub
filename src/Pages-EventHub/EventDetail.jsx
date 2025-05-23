@@ -3,6 +3,8 @@ import { useParams, useLocation } from 'react-router-dom';
 import Lightbox from "yet-another-react-lightbox";
 import Video from "yet-another-react-lightbox/plugins/video";
 import "yet-another-react-lightbox/styles.css";
+import Sidebar from "../components/sidebar";
+import Header from "../components/Header";
 
 // Leaflet Imports for Map
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
@@ -291,9 +293,12 @@ const EventDetail = () => {
 
     return (
         <div>
+        <Header/>
+            <Sidebar/>
+
             {/* Event Header */}
             <div className="event-header" style={{
-                backgroundImage: `linear-gradient(to right, rgba(59, 130, 246, 0.9), rgba(37, 99, 235, 0.9)), url(${headerImage})`,
+                backgroundImage: `linear-gradient(to right, rgba(191, 215, 255, 0.9), rgba(186, 208, 255, 0.9)), url(${headerImage})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
             }}>

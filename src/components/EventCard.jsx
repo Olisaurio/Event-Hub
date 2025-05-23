@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../Components-styles/EventCard.css';
 
 // EventCard Component
 const EventCard = ({ event }) => {
@@ -10,18 +11,21 @@ const EventCard = ({ event }) => {
     try {
       const startDate = new Date(start);
       const endDate = end ? new Date(end) : null;
-      const formatOptions = {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
+      
+      // Formatear hora
+      const formatTime = (date) => {
+        return date.toLocaleTimeString('es-ES', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        });
       };
       
-      if (endDate && startDate.toDateString() !== endDate.toDateString()) {
-        return `${startDate.toLocaleDateString('es-ES', formatOptions)} - 
-                ${endDate.toLocaleDateString('es-ES', formatOptions)}`;
+      if (endDate && startDate.toDateString() === endDate.toDateString()) {
+        return `Hoy • ${formatTime(startDate)} - ${formatTime(endDate)}`;
       }
      
-      return startDate.toLocaleDateString('es-ES', formatOptions);
+      return `Hoy • ${formatTime(startDate)}`;
     } catch (error) {
       console.error('Error al formatear fecha:', error);
       return 'Fecha inválida';
@@ -42,128 +46,40 @@ const EventCard = ({ event }) => {
   // Obtener la primera imagen principal si existe
   const imageUrl = event.mainImages && event.mainImages.length > 0 
     ? event.mainImages[0].url 
-    : "https://placehold.co/300x150";
+    : null;
 
   return (
-    <div 
-      className="event-card" 
-      onClick={handleCardClick}
-      style={{
-        width: '100%',
-        maxWidth: '300px',
-        margin: '10px',
-        border: '1px solid #eee',
-        borderRadius: '8px',
-        overflow: 'hidden',
-        boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-        cursor: 'pointer',
-        transition: 'transform 0.3s',
-        position: 'relative'
-      }}
-    >
-      <div 
-        className="event-image"
-        style={{
-          height: '150px',
-          backgroundImage: `url(${imageUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      />
+    <div className="event-card">
+      {formatPrice(event.price) === 'Gratis' && (
+        <div className="event-badge">Gratis</div>
+      )}
       
-      <div className="event-info" style={{ padding: '15px' }}>
-        <h3 style={{ 
-          margin: '0 0 8px 0', 
-          fontSize: '16px', 
-          fontWeight: 'bold',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap'
-        }}>
-          {event.title || 'Evento sin título'}
-        </h3>
-        
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center' 
-        }}>
-          <p style={{ 
-            margin: '0 0 5px 0', 
-            color: '#666', 
-            fontSize: '14px' 
-          }}>
-            {formatDateRange(event.start, event.end)}
-          </p>
-          
-          <p style={{ 
-            margin: '0 0 5px 0', 
-            color: '#1890ff', 
-            fontSize: '14px', 
-            fontWeight: 'bold' 
-          }}>
-            {formatPrice(event.price)}
-          </p>
-        </div>
-        
-        <p style={{ 
-          margin: '0', 
-          color: '#888', 
-          fontSize: '12px',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap'
-        }}>
-          {event.location?.address || 'Ubicación no especificada'}
-        </p>
-
-        {event.categories && event.categories.length > 0 && (
-          <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            marginTop: '8px',
-            gap: '4px'
-          }}>
-            {event.categories.slice(0, 2).map((category, index) => (
-              <span key={index} style={{
-                backgroundColor: '#f0f0f0',
-                color: '#666',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                fontSize: '10px'
-              }}>
-                {category}
-              </span>
-            ))}
-            {event.categories.length > 2 && (
-              <span style={{
-                backgroundColor: '#f0f0f0',
-                color: '#666',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                fontSize: '10px'
-              }}>
-                +{event.categories.length - 2}
-              </span>
-            )}
-          </div>
+      <div className="event-image">
+        {imageUrl ? (
+          <img src={imageUrl} alt={event.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : (
+          <div className="event-icon">♫</div>
         )}
       </div>
       
-      {event.privacy === 'Privado' && (
-        <div style={{
-          position: 'absolute',
-          top: '10px',
-          right: '10px',
-          backgroundColor: 'rgba(0, 0, 0, 0.6)',
-          color: 'white',
-          padding: '3px 8px',
-          borderRadius: '4px',
-          fontSize: '12px'
-        }}>
-          Privado
+      <div className="event-info">
+        <h3 className="event-title">
+          {event.title || 'Concierto en el Parque'}
+        </h3>
+        
+        <div className="event-date">
+          {formatDateRange(event.start, event.end) || 'Hoy • 18:00 - 22:00'}
         </div>
-      )}
+        
+        <div className="event-location">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+          </svg>
+          {event.location?.address || 'Parque Central'}
+        </div>
+        
+        <div className="event-button">Ver detalles</div>
+      </div>
     </div>
   );
 };

@@ -5,6 +5,8 @@ import Header from "../components/Header";
 import VerticalRecommendationsCarousel from "../components/VerticalRecommendationsCarousel";
 import CategoryFilterBar from "../components/CategoryFilterBar"; // Importar CategoryFilterBar
 import '../EventHub-Styles/EventHub.css';
+import Footer from "../components/footer";
+
 
 // Lista completa de categorías disponibles (puede venir de la API o ser constante)
 const allAvailableCategories = [
@@ -60,10 +62,15 @@ const EventHub = () => {
     const fetchEvents = async () => {
       setIsLoading(true);
       setError(null);
-      let url = "http://localhost:3001/events"; 
+      let url = "https://backendeventhub.onrender.com/api/events"; 
 
       try {
-        const response = await fetch(url);
+        const token = localStorage.getItem("token");
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : ''
+          }
+        });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -71,14 +78,19 @@ const EventHub = () => {
         
         const formattedEvents = data.map(event => ({
           id: event.id,
-          eventName: event.eventName,
-          date: event.date, 
+          title: event.title || event.eventName,
+          start: event.start,
+          end: event.end,
           // Asegurarse de que location es un objeto y tiene address, department y city
-          location: event.location ? 
+          location: event.location,
+          locationText: event.location ? 
             `${event.location.address || ''}${event.location.city ? `, ${event.location.city}` : ''}${event.location.department ? `, ${event.location.department}` : ''}` 
             : 'Ubicación no especificada',
-          image: event.mainImages && event.mainImages.length > 0 && event.mainImages[0].startsWith('data:') ? event.mainImages[0] : (event.mainImages && event.mainImages.length > 0 ? event.mainImages[0] : 'https://placehold.co/600x400?text=Evento'),
+          mainImages: event.mainImages || [],
+          image: event.mainImages && event.mainImages.length > 0 ? event.mainImages[0].url : 'https://placehold.co/600x400?text=Evento',
           categories: event.categories || [],
+          price: event.price,
+          privacy: event.privacy,
           originalEvent: event 
         }));
 
@@ -101,8 +113,8 @@ const EventHub = () => {
   const featuredEvents = useMemo(() => {
     const now = new Date();
     return [...allEvents]
-      .filter(event => new Date(event.date.start) >= now)
-      .sort((a, b) => new Date(a.date.start) - new Date(b.date.start))
+      .filter(event => event.start && new Date(event.start) >= now)
+      .sort((a, b) => new Date(a.start) - new Date(b.start))
       .slice(0, 6);
   }, [allEvents]);
 
@@ -114,12 +126,12 @@ const EventHub = () => {
     }
   };
 
-  const formatDateRange = (dateObj) => {
-    if (!dateObj || !dateObj.start) return 'Fecha no disponible';
-    const startDate = new Date(dateObj.start);
+  const formatDateRange = (start, end) => {
+    if (!start) return 'Fecha no disponible';
+    const startDate = new Date(start);
     let dateText = startDate.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
-    if (dateObj.end) {
-        const endDate = new Date(dateObj.end);
+    if (end) {
+        const endDate = new Date(end);
         if (startDate.toDateString() !== endDate.toDateString()) {
              dateText += ` - ${endDate.toLocaleDateString('es-ES', { day: 'numeric' })}`;
         }
@@ -185,8 +197,8 @@ const EventHub = () => {
                       {/* Mostrar ubicación completa aquí */}
                       {event.originalEvent?.location?.department && event.originalEvent?.location?.city ? 
                         `${event.originalEvent.location.city}, ${event.originalEvent.location.department}` 
-                        : event.location} <br />
-                      {formatDateRange(event.date)}
+                        : (event.locationText || event.location?.address || 'Ubicación no especificada')} <br />
+                      {formatDateRange(event.start, event.end)}
                     </p>
                     <Link to={`/event/${event.id}`} className="view-more-btn">Ver Más</Link>
                   </div>
@@ -206,8 +218,10 @@ const EventHub = () => {
             <VerticalRecommendationsCarousel similarEvents={recommendations} />
           </div>
         </div>
+        <Footer/>
         
       </div>
+              
     </div>
   );
 };

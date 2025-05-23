@@ -26,7 +26,12 @@ const EventsPage = () => {
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        const response = await fetch('http://localhost:3001/locations');
+        const token = localStorage.getItem("token");
+        const response = await fetch('https://backendeventhub.onrender.com/api/locations', {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : ''
+          }
+        });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -59,7 +64,7 @@ const EventsPage = () => {
     const fetchEvents = async () => {
       setIsLoading(true);
       setError(null);
-      let url = new URL('http://localhost:3001/events');
+      let url = new URL('https://backendeventhub.onrender.com/api/events');
       
       if (navigateCategory) {
         url.searchParams.append('category', navigateCategory);
@@ -72,20 +77,29 @@ const EventsPage = () => {
       }
 
       try {
-        const response = await fetch(url.toString());
+        const token = localStorage.getItem("token");
+        const response = await fetch(url.toString(), {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : ''
+          }
+        });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
         const formattedEvents = data.map(event => ({
           id: event.id,
-          eventName: event.eventName,
-          date: event.date, 
-          location: event.location?.address || 'Ubicación no especificada',
+          title: event.title || event.eventName,
+          start: event.start,
+          end: event.end,
+          location: event.location,
           department: event.location?.department,
           city: event.location?.city,
-          image: event.mainImages && event.mainImages.length > 0 ? event.mainImages[0] : 'https://placehold.co/600x400?text=Evento',
+          mainImages: event.mainImages || [],
+          image: event.mainImages && event.mainImages.length > 0 ? event.mainImages[0].url : 'https://placehold.co/600x400?text=Evento',
           categories: event.categories || [],
+          price: event.price,
+          privacy: event.privacy
         }));
         setEvents(formattedEvents);
       } catch (err) {
@@ -108,12 +122,12 @@ const EventsPage = () => {
     setSelectedCity(e.target.value);
   };
 
-  const formatDateRange = (dateObj) => {
-    if (!dateObj || !dateObj.start) return 'Fecha no disponible';
-    const startDate = new Date(dateObj.start);
+  const formatDateRange = (start, end) => {
+    if (!start) return 'Fecha no disponible';
+    const startDate = new Date(start);
     let dateText = startDate.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
-    if (dateObj.end) {
-        const endDate = new Date(dateObj.end);
+    if (end) {
+        const endDate = new Date(end);
         if (startDate.toDateString() !== endDate.toDateString()) {
              dateText += ` - ${endDate.toLocaleDateString('es-ES', { day: 'numeric' })}`;
         }

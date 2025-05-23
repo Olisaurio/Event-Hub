@@ -1,0 +1,79 @@
+.event-card {
+  width: 100%;
+  max-width: 300px;
+  margin: 10px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  position: relative;
+  background-color: white;
+}
+
+.event-image {
+  height: 150px;
+  background: linear-gradient(135deg, #9c4dff 0%, #6a11cb 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.event-image .event-icon {
+  font-size: 40px;
+  color: #000;
+  opacity: 0.8;
+}
+
+.event-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #00d15e;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 2;
+}
+
+.event-info {
+  padding: 15px;
+}
+
+.event-title {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #222;
+}
+
+.event-date {
+  margin: 0 0 5px 0;
+  color: #777;
+  font-size: 14px;
+}
+
+.event-location {
+  margin: 5px 0;
+  color: #777;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.event-location svg {
+  margin-right: 5px;
+}
+
+.event-button {
+  background-color: #9c4dff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  width: 100%;
+  margin-top: 15px;
+  font-weight: 500;
+  text-align: center;
+  font-size: 16px;
+}
