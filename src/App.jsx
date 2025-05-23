@@ -10,7 +10,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<DoubleSliderForm />} /> {/* This component handles both Login and Register */}
+        <Route path="/" element={<DoubleSliderForm />} />
         <Route path="/EventHub" element={<EventHub />} />
         <Route path="/event/:id" element={<EventDetail />} />
         <Route path="/events" element={<EventsListPage />} /> 
