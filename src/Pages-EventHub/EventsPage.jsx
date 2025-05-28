@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import Sidebar from '../components/sidebar'; // Actualizado
-import Header from '../components/Header'; // Actualizado
-import '../EventHub-Styles/EventsPage.css'; // Actualizado
+import Sidebar from '../components/sidebar';
+import Header from '../components/Header';
+import '../EventHub-Styles/EventsPage.css';
+import { withCheckAuth } from "../utils/CheckAuth";
+
 
 // Función para parsear query params de la URL
 function useQuery() {
@@ -29,8 +31,11 @@ const EventsPage = () => {
         const token = localStorage.getItem("token");
         const response = await fetch('https://backendeventhub.onrender.com/api/locations', {
           headers: {
-            'Authorization': token ? `Bearer ${token}` : ''
-          }
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          credentials: 'include' // Incluir cookies si las hay
         });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -64,28 +69,33 @@ const EventsPage = () => {
     const fetchEvents = async () => {
       setIsLoading(true);
       setError(null);
-      let url = new URL('https://backendeventhub.onrender.com/api/events');
+      
+      // Crear URL con parámetros de consulta
+      let urlObj = new URL("https://backendeventhub.onrender.com/api/events");
       
       if (navigateCategory) {
-        url.searchParams.append('category', navigateCategory);
+        urlObj.searchParams.append('category', navigateCategory);
       }
       if (selectedDepartment) {
-        url.searchParams.append('department', selectedDepartment);
+        urlObj.searchParams.append('department', selectedDepartment);
       }
       if (selectedCity) {
-        url.searchParams.append('city', selectedCity);
+        urlObj.searchParams.append('city', selectedCity);
       }
 
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(url.toString(), {
+        const response = await fetch(url, {
           headers: {
             'Authorization': token ? `Bearer ${token}` : ''
           }
         });
+        
         if (!response.ok) {
+          console.error('Error en la petición:', response.status, response.statusText);
           throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
         const data = await response.json();
         const formattedEvents = data.map(event => ({
           id: event.id,
@@ -186,15 +196,19 @@ const EventsPage = () => {
             events.map(event => (
               <div key={event.id} className="event-card">
                 <div className="event-image-container">
-                    <img src={event.image} alt={event.eventName} className="event-image" />
+                    <img src={event.image} alt={event.eventName || event.title} className="event-image" />
                 </div>
                 <div className="event-info">
-                  <h3>{event.eventName}</h3>
+                  <h3>{event.eventName || event.title}</h3>
                   <p className="event-meta">
-                    {event.location} ({event.city}, {event.department})<br />
-                    {formatDateRange(event.date)}
+                    {event.location?.address} {event.city && `(${event.city}`}{event.department && `, ${event.department})`}<br />
+                    {formatDateRange(event.start, event.end)}
                   </p>
-                  <p className="event-categories">Categorías: {event.categories.join(', ')}</p>
+                  <p className="event-categories">
+                    {event.categories && event.categories.length > 0 
+                      ? `Categorías: ${event.categories.join(', ')}` 
+                      : 'Sin categorías'}
+                  </p>
                   <Link to={`/event/${event.id}`} className="view-more-btn">Ver Más</Link>
                 </div>
               </div>
@@ -208,5 +222,4 @@ const EventsPage = () => {
   );
 };
 
-export default EventsPage;
-
+export default withCheckAuth(EventsPage);

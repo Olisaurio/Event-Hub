@@ -6,6 +6,7 @@ import VerticalRecommendationsCarousel from "../components/VerticalRecommendatio
 import CategoryFilterBar from "../components/CategoryFilterBar"; // Importar CategoryFilterBar
 import '../EventHub-Styles/EventHub.css';
 import Footer from "../components/footer";
+import { withCheckAuth } from "../utils/CheckAuth"; // Importar el HOC de autenticación
 
 
 // Lista completa de categorías disponibles (puede venir de la API o ser constante)
@@ -226,5 +227,5 @@ const EventHub = () => {
   );
 };
 
-export default EventHub;
-
+// Exportar el componente envuelto con el HOC de autenticación
+export default withCheckAuth(EventHub);

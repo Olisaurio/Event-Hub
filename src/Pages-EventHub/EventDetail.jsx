@@ -14,6 +14,8 @@ import L from 'leaflet';
 import '../EventHub-Styles/EventDetail.css';
 import SubEventsComponent from '../components/SubEvents';
 
+import { withCheckAuth } from "../utils/CheckAuth";
+
 // Fix Default Leaflet Icon
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -539,4 +541,4 @@ const EventDetail = () => {
     );
 };
 
-export default EventDetail;
+export default withCheckAuth(EventDetail);

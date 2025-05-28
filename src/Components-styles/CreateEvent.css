@@ -1,4 +1,6 @@
-/* Variables globales mejoradas */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;/* Variables globales mejoradas */
 :root {
   --primary-color: #5E81AC; /* Slightly softer blue */
   --primary-hover: #4C6A8D;

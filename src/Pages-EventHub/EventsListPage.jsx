@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import CategoryFilterBar from '../components/CategoryFilterBar';
 import EventCard from '../components/EventCard';
 import '../EventHub-Styles/EventsListPage.css';
+import { withCheckAuth } from "../utils/CheckAuth"; // Importar el HOC de autenticación
 
 // Función para parsear query params de la URL
 function useQuery() {
@@ -18,26 +19,87 @@ const EventsListPage = () => {
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Estados de los filtros
-  const [selectedCategory, setSelectedCategory] = useState(query.get('category') || 'all');
-  const [priceFilter, setPriceFilter] = useState('all'); // 'all', 'free', 'paid'
-  const [maxPrice, setMaxPrice] = useState('');
-  const [selectedType, setSelectedType] = useState('');
+  
+  // Categoría seleccionada desde la URL o 'all' por defecto
+  const [activeCategory, setActiveCategory] = useState(query.get('category') || 'all');
+  
+  // Lista de categorías disponibles
+  const categories = [
+    { name: 'Todos', id: 'all' },
+    { name: 'Música', id: 'Música' },
+    { name: 'Arte y Cultura', id: 'Arte y Cultura' },
+    { name: 'Comida y Bebida', id: 'Comida y Bebida' },
+    { name: 'Deportes', id: 'Deportes' },
+    { name: 'Negocios', id: 'Negocios' },
+    { name: 'Tecnología', id: 'Tecnología' },
+    { name: 'Aire Libre', id: 'Aire Libre' },
+    { name: 'Comunidad', id: 'Comunidad' },
+    { name: 'Familia', id: 'Familia' },
+    { name: 'Cine', id: 'Cine' },
+    { name: 'Moda', id: 'Moda' },
+    { name: 'Educación', id: 'Educación' },
+    { name: 'Salud y Bienestar', id: 'Salud y Bienestar' },
+    { name: 'Otros', id: 'Otros' }
+  ];
 
   // Cargar eventos desde la API
   useEffect(() => {
     const fetchEvents = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
-        const response = await fetch('https://backendeventhub.onrender.com/api/events');
-        if (!response.ok) throw new Error('Failed to fetch events');
+        const token = localStorage.getItem("token");
+        
+        // Verificar si el token existe antes de hacer la petición
+        if (!token) {
+          console.error("No hay token disponible");
+          setError("No hay sesión activa. Por favor inicie sesión.");
+          setLoading(false);
+          return;
+        }
+        
+        console.log("Intentando fetch con token:", token.substring(0, 10) + "...");
+        
+        const response = await fetch('https://backendeventhub.onrender.com/api/events', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          credentials: 'include' // Incluir cookies si las hay
+        });
+        
+        console.log("Respuesta de la API:", response.status, response.statusText);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
-        setEvents(data);
-        setError(null);
+        console.log("Datos recibidos:", data.length, "eventos");
+        
+        // Formatear los datos para su uso en la UI
+        const formattedEvents = data.map(event => ({
+          id: event.id,
+          title: event.title || event.eventName,
+          start: event.start,
+          end: event.end,
+          location: event.location,
+          locationText: event.location ? 
+            `${event.location.address || ''}${event.location.city ? `, ${event.location.city}` : ''}${event.location.department ? `, ${event.location.department}` : ''}` 
+            : 'Ubicación no especificada',
+          mainImages: event.mainImages || [],
+          image: event.mainImages && event.mainImages.length > 0 ? event.mainImages[0].url : 'https://placehold.co/600x400?text=Evento',
+          categories: event.categories || [],
+          price: event.price,
+          privacy: event.privacy,
+          originalEvent: event
+        }));
+        
+        setEvents(formattedEvents);
       } catch (err) {
+        console.error("Error fetching events:", err);
         setError(err.message);
-        setEvents([]);
       } finally {
         setLoading(false);
       }
@@ -46,129 +108,105 @@ const EventsListPage = () => {
     fetchEvents();
   }, []);
 
+  // Filtrar eventos cuando cambia la categoría activa o la lista de eventos
   useEffect(() => {
-    setSelectedCategory(query.get('category') || 'all');
-  }, [location.search, query]);
-
-  useEffect(() => {
-    let tempEvents = [...events];
-
-    if (selectedCategory && selectedCategory !== 'all') {
-      tempEvents = tempEvents.filter(event => 
-        event.categories && event.categories.map(c => c.toLowerCase()).includes(selectedCategory.toLowerCase())
-      );
+    if (activeCategory === 'all') {
+      setFilteredEvents(events);
+    } else {
+      setFilteredEvents(events.filter(event => 
+        event.categories && event.categories.includes(activeCategory)
+      ));
     }
+  }, [activeCategory, events]);
 
-    if (priceFilter === 'free') {
-      tempEvents = tempEvents.filter(event => event.ticketType === 'Gratis' || (event.price && event.price.amount === 0));
-    } else if (priceFilter === 'paid') {
-      tempEvents = tempEvents.filter(event => event.ticketType === 'Pago' && event.price && event.price.amount > 0);
-      if (maxPrice && !isNaN(parseFloat(maxPrice))) {
-        tempEvents = tempEvents.filter(event => event.price.amount <= parseFloat(maxPrice));
-      }
+  // Manejar cambio de categoría
+  const handleCategorySelect = (categoryId) => {
+    setActiveCategory(categoryId);
+    
+    // Actualizar la URL sin recargar la página
+    if (categoryId === 'all') {
+      navigate('/events');
+    } else {
+      navigate(`/events?category=${encodeURIComponent(categoryId)}`);
     }
-
-    if (selectedType) {
-      tempEvents = tempEvents.filter(event => event.type === selectedType);
-    }
-
-    setFilteredEvents(tempEvents);
-  }, [events, selectedCategory, priceFilter, maxPrice, selectedType]);
-
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
-    navigate(`${location.pathname}?category=${encodeURIComponent(category)}`);
   };
 
-  const handlePriceTypeChange = (e) => {
-    setPriceFilter(e.target.value);
-    if (e.target.value === 'free') setMaxPrice('');
-  };
-  
-  const categoriesForBar = [
-    { name: 'Todos', id: 'all' },
-    { name: 'Música', id: 'Música' },
-    { name: 'Arte y Cultura', id: 'Arte y Cultura' },
-    { name: 'Comida y Bebida', id: 'Comida y Bebida' },
-    { name: 'Deportes', id: 'Deportes' },
-    { name: 'Negocios', id: 'Negocios' },
-    { name: 'Tecnología', id: 'Tecnología' },
-  ];
+  // Actualizar categoría activa cuando cambia la URL
+  useEffect(() => {
+    const categoryParam = query.get('category');
+    if (categoryParam) {
+      setActiveCategory(categoryParam);
+    } else {
+      setActiveCategory('all');
+    }
+  }, [location, query]);
 
-  const eventTypes = ['simple', 'recurrente', 'multi-sesión'];
+  if (loading) {
+    return (
+      <div className="events-list-page">
+        <div className="events-list-header">
+          <h1>Eventos</h1>
+          <CategoryFilterBar 
+            categories={categories}
+            activeCategory={activeCategory}
+            onCategorySelect={handleCategorySelect}
+          />
+        </div>
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Cargando eventos...</p>
+        </div>
+      </div>
+    );
+  }
 
-  if (loading) return <div className="events-list-page-loading">Cargando eventos...</div>;
-  if (error) return <div className="events-list-page-error">Error al cargar eventos: {error}</div>;
+  if (error) {
+    return (
+      <div className="events-list-page">
+        <div className="events-list-header">
+          <h1>Eventos</h1>
+          <CategoryFilterBar 
+            categories={categories}
+            activeCategory={activeCategory}
+            onCategorySelect={handleCategorySelect}
+          />
+        </div>
+        <div className="error-container">
+          <h2>Error al cargar eventos</h2>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="events-list-page-container">
-      <CategoryFilterBar 
-        categories={categoriesForBar} 
-        onCategorySelect={handleCategorySelect} 
-        activeCategory={selectedCategory} 
-      />
+    <div className="events-list-page">
+      <div className="events-list-header">
+        <h1>Eventos</h1>
+        <CategoryFilterBar 
+          categories={categories}
+          activeCategory={activeCategory}
+          onCategorySelect={handleCategorySelect}
+        />
+      </div>
       
-      <div className="filters-and-events">
-        <aside className="filters-sidebar">
-          <h3>Filtrar Eventos</h3>
-          
-          <div className="filter-group price-filter">
-            <h4>Precio</h4>
-            <label>
-              <input type="radio" name="priceType" value="all" checked={priceFilter === 'all'} onChange={handlePriceTypeChange} />
-              Todos
-            </label>
-            <label>
-              <input type="radio" name="priceType" value="free" checked={priceFilter === 'free'} onChange={handlePriceTypeChange} />
-              Gratis
-            </label>
-            <label>
-              <input type="radio" name="priceType" value="paid" checked={priceFilter === 'paid'} onChange={handlePriceTypeChange} />
-              De Pago
-            </label>
-            {priceFilter === 'paid' && (
-              <div className="max-price-input">
-                <label htmlFor="maxPrice">Precio Máx.:</label>
-                <input 
-                  type="number" 
-                  id="maxPrice" 
-                  value={maxPrice} 
-                  onChange={(e) => setMaxPrice(e.target.value)} 
-                  placeholder="Ej: 50000"
-                />
-              </div>
-            )}
+      <div className="events-grid">
+        {filteredEvents.length > 0 ? (
+          filteredEvents.map(event => (
+            <EventCard 
+              key={event.id}
+              event={event}
+            />
+          ))
+        ) : (
+          <div className="no-events-message">
+            <p>No hay eventos disponibles para la categoría seleccionada.</p>
           </div>
-
-          <div className="filter-group type-filter">
-            <h4>Tipo de Evento</h4>
-            <select 
-              value={selectedType} 
-              onChange={(e) => setSelectedType(e.target.value)}
-              className="type-select"
-            >
-              <option value="">Todos</option>
-              {eventTypes.map(type => (
-                <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
-              ))}
-            </select>
-          </div>
-        </aside>
-
-        <main className="events-grid-container">
-          {filteredEvents.length > 0 ? (
-            <div className="events-grid">
-              {filteredEvents.map(event => (
-                <EventCard key={event._id} event={event} /> 
-              ))}
-            </div>
-          ) : (
-            <p className="no-events-message">No se encontraron eventos con los filtros seleccionados.</p>
-          )}
-        </main>
+        )}
       </div>
     </div>
   );
 };
 
-export default EventsListPage;
+// Exportar el componente envuelto con el HOC de autenticación
+export default withCheckAuth(EventsListPage);

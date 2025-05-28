@@ -13,6 +13,7 @@
     "@cloudinary/react": "^1.14.3",
     "@cloudinary/url-gen": "^1.21.0",
     "@lottiefiles/react-lottie-player": "^3.6.0",
+    "@react-leaflet/core": "^3.0.0",
     "chroma-js": "^3.1.2",
     "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
@@ -32,11 +33,27 @@
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9.19.0",
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.18",
     "globals": "^15.14.0",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.1.7",
     "vite": "^6.1.0"
-  }
+  },
+  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Olisaurio/Event-Hub.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Olisaurio/Event-Hub/issues"
+  },
+  "homepage": "https://github.com/Olisaurio/Event-Hub#readme"
 }

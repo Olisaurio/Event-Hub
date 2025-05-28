@@ -1,14 +1,17 @@
 .category-filter-bar-container {
   width: 100%;
-  overflow-x: auto; /* Permite scroll horizontal si hay muchas categorías */
-  background-color: #f8f9fa; /* Un color de fondo suave */
-  padding: 8px 0;
-  border-bottom: 1px solid #dee2e6; /* Un borde sutil */
+  background: linear-gradient(135deg, #f3f0ff 0%, #e8e2ff 100%);
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(129, 90, 248, 0.1);
 }
 
 .category-filter-bar {
   display: flex;
-  justify-content: center; /* Centra las categorías si caben */
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
 }
 
 .category-list {
@@ -16,27 +19,39 @@
   padding: 0;
   margin: 0;
   display: flex;
-  flex-wrap: nowrap; /* Evita que las categorías se envuelvan a la siguiente línea */
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
 }
 
 .category-item {
   padding: 10px 20px;
   cursor: pointer;
-  white-space: nowrap; /* Evita que el texto de la categoría se divida en múltiples líneas */
-  font-size: 1rem;
-  color: #495057;
-  border-bottom: 3px solid transparent; /* Para el indicador activo */
-  transition: color 0.2s ease, border-bottom-color 0.2s ease;
+  white-space: nowrap;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f5ff 50%, #ffffff 100%);
+  border: 1px solid #e8e2ff;
+  box-shadow: 0 2px 4px rgba(129, 90, 248, 0.05);
+  transition: all 0.2s ease;
+  color: #6c5dd8;
 }
 
 .category-item:hover {
-  color: #007bff; /* Color de hover */
+  color: #815af8;
+  background: linear-gradient(135deg, #f8f5ff 0%, #e8e2ff 50%, #f8f5ff 100%);
+  border-color: #815af8;
+  box-shadow: 0 2px 4px rgba(129, 90, 248, 0.1);
 }
 
 .category-item.active {
-  color: #007bff; /* Color del ítem activo */
+  color: white;
   font-weight: 600;
-  border-bottom-color: #007bff; /* Indicador visual para el ítem activo */
+  background: linear-gradient(135deg, #815af8 0%, #6330f3 100%);
+  border-color: #815af8;
+  box-shadow: 0 2px 8px rgba(129, 90, 248, 0.2);
 }
 
 /* Media query para pantallas más pequeñas donde centrar podría no ser ideal */

@@ -8,12 +8,17 @@ body {
 
 /* Event Header */
 .event-header {
-    background: linear-gradient(to right, #3b82f6, #2563eb);
-    height: 350px;
     position: relative;
-    color: white;
+    height: 350px;
     margin-bottom: 2rem;
-    width: 100%;
+    width: calc(100% - 250px); /* Adjust for sidebar width */
+    color: white;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+    float: right;
+    margin-left: 250px; /* Same as sidebar width */
 }
 
 .event-header-container {
@@ -25,7 +30,7 @@ body {
     display: flex;
     align-items: flex-end;
     position: relative;
-    z-index: 20;
+    z-index: 1;
 }
 
 .event-header-content {
