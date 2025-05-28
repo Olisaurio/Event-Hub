@@ -6,7 +6,7 @@ import VerticalRecommendationsCarousel from "../components/VerticalRecommendatio
 import CategoryFilterBar from "../components/CategoryFilterBar"; // Importar CategoryFilterBar
 import '../EventHub-Styles/EventHub.css';
 import Footer from "../components/footer";
-import { withCheckAuth } from "../utils/CheckAuth"; // Importar el HOC de autenticación
+import { withCheckAuth } from "../Utils/CheckAuth"; // Importar el HOC de autenticación
 
 
 // Lista completa de categorías disponibles (puede venir de la API o ser constante)

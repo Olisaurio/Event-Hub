@@ -14,7 +14,7 @@ import L from 'leaflet';
 import '../EventHub-Styles/EventDetail.css';
 import SubEventsComponent from '../components/SubEvents';
 
-import { withCheckAuth } from "../utils/CheckAuth";
+import { withCheckAuth } from "../Utils/CheckAuth";
 
 // Fix Default Leaflet Icon
 delete L.Icon.Default.prototype._getIconUrl;

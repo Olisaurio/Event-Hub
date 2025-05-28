@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import CategoryFilterBar from '../components/CategoryFilterBar';
 import EventCard from '../components/EventCard';
 import '../EventHub-Styles/EventsListPage.css';
-import { withCheckAuth } from "../utils/CheckAuth"; // Importar el HOC de autenticación
+import { withCheckAuth } from "../Utils/CheckAuth";// Importar el HOC de autenticación
 
 // Función para parsear query params de la URL
 function useQuery() {

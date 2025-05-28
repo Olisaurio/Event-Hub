@@ -3,7 +3,7 @@ import { useLocation, Link } from 'react-router-dom';
 import Sidebar from '../components/sidebar';
 import Header from '../components/Header';
 import '../EventHub-Styles/EventsPage.css';
-import { withCheckAuth } from "../utils/CheckAuth";
+import { withCheckAuth } from "../Utils/CheckAuth";
 
 
 // Función para parsear query params de la URL

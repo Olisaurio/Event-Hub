@@ -6,7 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import { withCheckAuth } from "../utils/CheckAuth";
+import { withCheckAuth } from "../Utils/CheckAuth";
 
 // Solución al problema de iconos en Leaflet con React
 delete L.Icon.Default.prototype._getIconUrl;
