@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Sidebar from './sidebar';
-import '../Components-styles/CreateEvent.css';
 import Header from './Header';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
