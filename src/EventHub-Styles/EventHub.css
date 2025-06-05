@@ -1,220 +1,342 @@
-/* EventHub.css */
-  .event-hub-banner {
-    width: 100%;
-    height: 400px; /* Adjust as needed */
-    background-image: url('https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1700&q=80'); /* Placeholder, user should replace */
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    text-align: center;
-    padding: 20px;
-    border-radius: var(--border-radius);
-    margin-bottom: 30px;
-  }
-  
-  .banner-title {
-    font-size: 2.8em;
-    font-weight: 700;
-    margin-bottom: 10px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-  }
-  
-  .banner-subtitle {
-    font-size: 1.2em;
-    font-weight: 400;
-    max-width: 600px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-  }
-  
-  /* Container for all filters */
-  .filters-container {
-    display: flex;
-    flex-wrap: wrap; /* Allow filters to wrap on smaller screens */
-    gap: 20px; /* Space between filter groups */
-    margin-bottom: 30px;
-    padding: 20px;
-    background-color: #fff; /* Light background for filter section */
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-  }
-  
-  .filter-item {
-    display: flex;
-    flex-direction: column; /* Stack label and input/select */
-    gap: 8px;
-    flex: 1; /* Allow items to grow and shrink */
-    min-width: 200px; /* Minimum width for each filter item */
-  }
-  
-  .filter-item label {
-    font-weight: 500;
-    color: var(--light-text);
-    font-size: 0.9em;
-  }
-  
-  .filter-select,
-  .filter-input {
-    padding: 10px 12px;
-    border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
-    background-color: var(--secondary-color);
-    font-size: 0.95em;
-    width: 100%; /* Make them take full width of .filter-item */
-  }
-  
-  .filter-select:focus,
-  .filter-input:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    background-color: #fff;
-    box-shadow: 0 0 0 2px rgba(136, 192, 208, 0.3);
-  }
-  
+/* EventHub.css - Carrusel Automático */
+
+/* Contenedor principal del carrusel */
+.carousel-container {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  border-radius: 20px; /* Bordes más redondos */
+  margin-bottom: 30px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Wrapper que contiene todas las slides */
+.carousel-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Cada slide individual */
+.carousel-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+  border-radius: 20px; /* Bordes redondos heredados */
+}
+
+/* Slide activa */
+.carousel-slide.active {
+  opacity: 1;
+}
+
+/* Overlay oscuro para mejorar legibilidad del texto */
+.carousel-slide::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg, 
+    rgba(0, 0, 0, 0.4) 0%, 
+    rgba(0, 0, 0, 0.2) 50%, 
+    rgba(0, 0, 0, 0.4) 100%
+  );
+  border-radius: 20px;
+}
+
+/* Contenido del carrusel */
+.carousel-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: white;
+  padding: 20px;
+  max-width: 800px;
+}
+
+/* Títulos del banner */
+.banner-title {
+  font-size: 2.8em;
+  font-weight: 700;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+  line-height: 1.2;
+}
+
+.banner-subtitle {
+  font-size: 1.2em;
+  font-weight: 400;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
+  line-height: 1.4;
+  opacity: 0.95;
+}
+
+/* Indicadores del carrusel */
+.carousel-indicators {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 3;
+}
+
+.indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator.active {
+  background-color: rgba(255, 255, 255, 0.9);
+  transform: scale(1.2);
+}
+
+.indicator:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Container for all filters */
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-item label {
+  font-weight: 500;
+  color: var(--light-text);
+  font-size: 0.9em;
+}
+
+.filter-select,
+.filter-input {
+  padding: 10px 12px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  background-color: var(--secondary-color);
+  font-size: 0.95em;
+  width: 100%;
+}
+
+.filter-select:focus,
+.filter-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  background-color: #fff;
+  box-shadow: 0 0 0 2px rgba(136, 192, 208, 0.3);
+}
+
+.event-hub-main-content-area {
+  display: flex;
+  gap: 30px;
+}
+
+.featured-events-column {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.recommendations-column {
+  flex: 1;
+  min-width: 280px;
+}
+
+.featured-events-title {
+  font-size: 1.8em;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.featured-event-card {
+  display: flex;
+  background-color: #fff;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  gap: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.featured-event-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+
+.featured-event-info {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.featured-event-info h3 {
+  font-size: 1.3em;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 8px;
+}
+
+.featured-event-meta {
+  font-size: 0.9em;
+  color: var(--light-text);
+  margin-bottom: 15px;
+}
+
+.view-more-btn {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  padding: 8px 15px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9em;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  align-self: flex-start;
+}
+
+.view-more-btn:hover {
+  background-color: #dde2eb;
+  border-color: var(--accent-color);
+}
+
+.featured-event-image-container {
+  flex: 1;
+  max-width: 200px;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.featured-event-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: var(--border-radius);
+}
+
+.no-events-message {
+  text-align: center;
+  padding: 30px;
+  font-style: italic;
+  color: var(--light-text);
+  background-color: #fff;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  margin-top: 20px;
+}
+
+/* Responsive design */
+@media (max-width: 992px) {
   .event-hub-main-content-area {
-    display: flex;
-    gap: 30px;
-  }
-  
-  .featured-events-column {
-    flex: 3; /* Takes more space */
-    display: flex;
     flex-direction: column;
-    gap: 20px;
   }
   
   .recommendations-column {
-    flex: 1; /* Takes less space */
-    min-width: 280px; /* Ensure it doesn't get too squeezed */
-  }
-  
-  .featured-events-title {
-    font-size: 1.8em;
-    font-weight: 600;
-    color: var(--text-color);
-    margin-bottom: 10px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border-color);
+    min-width: 100%;
   }
   
   .featured-event-card {
-    display: flex;
-    background-color: #fff;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    padding: 20px;
-    gap: 20px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  
-  .featured-event-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-  }
-  
-  .featured-event-info {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .featured-event-info h3 {
-    font-size: 1.3em;
-    font-weight: 600;
-    color: var(--primary-color);
-    margin-bottom: 8px;
-  }
-  
-  .featured-event-meta {
-    font-size: 0.9em;
-    color: var(--light-text);
-    margin-bottom: 15px;
-  }
-  
-  .view-more-btn {
-    background-color: var(--secondary-color);
-    color: var(--text-color);
-    padding: 8px 15px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.9em;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-    align-self: flex-start; /* Align to the start of the flex container */
-  }
-  
-  .view-more-btn:hover {
-    background-color: #dde2eb;
-    border-color: var(--accent-color);
+    flex-direction: column-reverse;
   }
   
   .featured-event-image-container {
-    flex: 1;
-    max-width: 200px; /* Max width for the image */
-    height: auto; /* Maintain aspect ratio */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    max-width: 100%;
+    margin-bottom: 15px;
   }
   
-  .featured-event-image {
-    width: 100%;
-    height: 150px; /* Fixed height for consistency */
-    object-fit: cover;
-    border-radius: var(--border-radius);
+  .filters-container {
+    flex-direction: column;
   }
   
-  /* Responsive adjustments */
-  @media (max-width: 992px) {
-    .event-hub-main-content-area {
-      flex-direction: column;
-    }
-    .recommendations-column {
-      min-width: 100%; /* Full width on smaller screens */
-    }
-    .featured-event-card {
-      flex-direction: column-reverse; /* Image on top on smaller screens */
-    }
-    .featured-event-image-container {
-      max-width: 100%;
-      margin-bottom: 15px;
-    }
-    .filters-container {
-      flex-direction: column; /* Stack filters vertically on medium screens */
-    }
-    .filter-item {
-      min-width: 100%; /* Filters take full width */
-    }
+  .filter-item {
+    min-width: 100%;
   }
   
-  @media (max-width: 768px) {
-    .event-hub-banner {
-      height: 300px;
-    }
-    .banner-title {
-      font-size: 2em;
-    }
-    .banner-subtitle {
-      font-size: 1em;
-    }
-    .featured-event-info h3 {
-      font-size: 1.1em;
-    }
+  .carousel-container {
+    height: 350px;
+    border-radius: 15px;
   }
   
-  .no-events-message {
-    text-align: center;
-    padding: 30px;
-    font-style: italic;
-    color: var(--light-text);
-    background-color: #fff;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    margin-top: 20px;
+  .carousel-slide {
+    border-radius: 15px;
   }
   
+  .carousel-slide::before {
+    border-radius: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .carousel-container {
+    height: 300px;
+    border-radius: 12px;
+  }
   
+  .carousel-slide {
+    border-radius: 12px;
+  }
+  
+  .carousel-slide::before {
+    border-radius: 12px;
+  }
+  
+  .banner-title {
+    font-size: 2em;
+  }
+  
+  .banner-subtitle {
+    font-size: 1em;
+  }
+  
+  .featured-event-info h3 {
+    font-size: 1.1em;
+  }
+  
+  .carousel-indicators {
+    bottom: 15px;
+  }
+  
+  .indicator {
+    width: 10px;
+    height: 10px;
+  }
+}

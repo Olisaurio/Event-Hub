@@ -3,8 +3,6 @@ import { useParams, useLocation } from 'react-router-dom';
 import Lightbox from "yet-another-react-lightbox";
 import Video from "yet-another-react-lightbox/plugins/video";
 import "yet-another-react-lightbox/styles.css";
-import Sidebar from "../components/sidebar";
-import Header from "../components/Header";
 
 // Leaflet Imports for Map
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
@@ -170,10 +168,12 @@ const EventDetail = () => {
             setIsLoading(true); 
             setError(null);
             try {
-                const token = localStorage.getItem("token"); // Recuperar token
+                // Recuperar token (con manejo de caso donde no existe)
+                const token = localStorage.getItem("token") || '';
 
                 const eventFromState = location.state?.event;
-                if (eventFromState && eventFromState._id === id) {
+                // Corregido: Verificar el id del evento usando la propiedad correcta
+                if (eventFromState && eventFromState.id === id) {
                     console.log("Usando evento desde estado");
                     setEvent(eventFromState);
                 } else {
@@ -182,15 +182,20 @@ const EventDetail = () => {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}` // Autorización con token
+                            // Solo incluir Authorization si hay token
+                            ...(token && { 'Authorization': `Bearer ${token}` })
                         }
                     });
 
                     if (!response.ok) throw new Error(response.status === 404 ? 'Evento no encontrado.' : `Error ${response.status}`);
                     const eventData = await response.json();
-                    setEvent(eventData);
+                    
+                    // Procesar datos para adaptarlos al formato esperado por el frontend
+                    const processedEvent = processEventData(eventData);
+                    setEvent(processedEvent);
                 }
             } catch (err) { 
+                console.error("Error fetching event:", err);
                 setError(err.message); 
             } finally { 
                 setIsLoading(false); 
@@ -199,6 +204,38 @@ const EventDetail = () => {
 
         fetchEventDetails();
     }, [id, location.state]);
+
+    // Función para procesar y adaptar los datos del evento
+    const processEventData = (eventData) => {
+        // Crear una copia para no mutar el original
+        const processedEvent = { ...eventData };
+        
+        // Mapear ticketType de "paid" a "Pago"
+        if (processedEvent.ticketType === "paid") {
+            processedEvent.ticketType = "Pago";
+        }
+        
+        // Crear array de categorías a partir del objeto categoria
+        if (processedEvent.categoria && processedEvent.categoria.nombreCategoria) {
+            processedEvent.categories = [processedEvent.categoria.nombreCategoria];
+        } else {
+            processedEvent.categories = [];
+        }
+        
+        // Mapear currentAttendees a occupiedTickets si existe
+        if (processedEvent.currentAttendees !== undefined) {
+            processedEvent.occupiedTickets = processedEvent.currentAttendees;
+        }
+        
+        // Asegurar que privacy esté en español
+        if (processedEvent.privacy === "public") {
+            processedEvent.privacy = "Público";
+        } else if (processedEvent.privacy === "private") {
+            processedEvent.privacy = "Privado";
+        }
+        
+        return processedEvent;
+    };
 
     const formatDate = (dateString) => {
         if (!dateString) return 'No especificada';
@@ -234,7 +271,16 @@ const EventDetail = () => {
     };
     
     const getDisplayPrice = (event) => {
-        if (event?.ticketType === 'Pago' && event.price && typeof event.price.amount === 'number' && event.price.amount > 0) {
+        // Verificar si el evento existe y tiene las propiedades necesarias
+        if (!event) return 'Gratuito';
+        
+        // Verificar si es un evento de pago con precio válido
+        if (
+            (event.ticketType === 'Pago' || event.ticketType === 'paid') && 
+            event.price && 
+            typeof event.price.amount === 'number' && 
+            event.price.amount > 0
+        ) {
             try {
                 return Number(event.price.amount).toLocaleString('es-CO', { 
                     style: 'currency', 
@@ -243,6 +289,7 @@ const EventDetail = () => {
                     maximumFractionDigits: 2 
                 });
             } catch (e) { 
+                console.error("Error formateando precio:", e);
                 return `COP ${event.price.amount} (Error formato)`; 
             }
         }
@@ -250,10 +297,17 @@ const EventDetail = () => {
     };
 
     const calculateRemainingTickets = (event) => {
-        if (event?.maxAttendees == null || typeof event.maxAttendees !== 'number' || event.maxAttendees <= 0) {
+        if (!event) return null;
+        
+        if (event.maxAttendees == null || typeof event.maxAttendees !== 'number' || event.maxAttendees <= 0) {
             return null;
         }
-        const occupied = typeof event.occupiedTickets === 'number' ? event.occupiedTickets : 0;
+        
+        // Usar occupiedTickets o currentAttendees, lo que esté disponible
+        const occupied = typeof event.occupiedTickets === 'number' 
+            ? event.occupiedTickets 
+            : (typeof event.currentAttendees === 'number' ? event.currentAttendees : 0);
+            
         const remaining = event.maxAttendees - occupied;
         return remaining >= 0 ? remaining : 0;
     };
@@ -277,9 +331,14 @@ const EventDetail = () => {
     const displayPrice = getDisplayPrice(event);
     const remainingTickets = calculateRemainingTickets(event);
 
-    // Preparar slides para el lightbox
-    const mainMediaUrls = event.mainImages ? event.mainImages.map(img => img.url) : [];
-    const galleryMediaUrls = event.galleryImages ? event.galleryImages.map(img => img.url) : [];
+    // Preparar slides para el lightbox con validación
+    const mainMediaUrls = event.mainImages && Array.isArray(event.mainImages) 
+        ? event.mainImages.map(img => img?.url).filter(Boolean) 
+        : [];
+        
+    const galleryMediaUrls = event.galleryImages && Array.isArray(event.galleryImages) 
+        ? event.galleryImages.map(img => img?.url).filter(Boolean) 
+        : [];
     
     const allMediaSources = [
         ...mainMediaUrls.map(src => ({ src, type: 'image' })),
@@ -288,15 +347,13 @@ const EventDetail = () => {
     
     const lightboxSlides = allMediaSources.map(media => ({ src: media.src }));
 
-    // Imagen principal para el encabezado
-    const headerImage = event.mainImages && event.mainImages.length > 0 
+    // Imagen principal para el encabezado con validación
+    const headerImage = event.mainImages && Array.isArray(event.mainImages) && event.mainImages.length > 0 && event.mainImages[0]?.url
         ? event.mainImages[0].url 
         : "https://placehold.co/1200x300?text=Sin+Imagen+Principal";
 
     return (
         <div>
-        <Header/>
-            <Sidebar/>
 
             {/* Event Header */}
             <div className="event-header" style={{
@@ -353,6 +410,18 @@ const EventDetail = () => {
                                 <CategoryTags categories={event.categories} />
                             </div>
                         )}
+                        
+                        {/* Tags */}
+                        {event.tags && event.tags.length > 0 && (
+                            <div className="tags-container">
+                                <h3 className="tags-title">Etiquetas</h3>
+                                <div className="tags-list">
+                                    {event.tags.map((tag, index) => (
+                                        <span key={index} className="tag-item">#{tag}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                     
                     {/* Gallery Section */}
@@ -382,161 +451,90 @@ const EventDetail = () => {
                             
                             {event.maxAttendees && (
                                 <div className="ticket-info-item">
-                                    <span className="ticket-info-label">Disponibilidad</span>
-                                    <span className="ticket-info-value">{event.maxAttendees} lugares</span>
+                                    <span className="ticket-info-label">Capacidad máxima</span>
+                                    <span className="ticket-info-value">{event.maxAttendees} personas</span>
                                 </div>
                             )}
                             
-                            <div className="ticket-info-item">
-                                <span className="ticket-info-label">Fecha de inicio</span>
-                                <span className="ticket-info-value">{formatShortDate(event.start)}</span>
-                            </div>
-                            
-                            {event.end && (
+                            {remainingTickets !== null && (
                                 <div className="ticket-info-item">
-                                    <span className="ticket-info-label">Fecha de fin</span>
-                                    <span className="ticket-info-value">{formatShortDate(event.end)}</span>
+                                    <span className="ticket-info-label">Tickets disponibles</span>
+                                    <span className="ticket-info-value">{remainingTickets} tickets</span>
+                                </div>
+                            )}
+                            
+                            {event.permitirInscripciones && event.fechaLimiteInscripcion && (
+                                <div className="ticket-info-item">
+                                    <span className="ticket-info-label">Fecha límite de inscripción</span>
+                                    <span className="ticket-info-value">{formatShortDate(event.fechaLimiteInscripcion)}</span>
                                 </div>
                             )}
                         </div>
                         
-                        <button className="subscribe-btn">
-                            Suscribirse al evento
-                        </button>
+                        <div className="ticket-actions">
+                            {event.permitirInscripciones !== false && (
+                                <button className="btn-primary">
+                                    <i className="fas fa-ticket-alt"></i> Inscribirse
+                                </button>
+                            )}
+                            <button className="btn-secondary">
+                                <i className="far fa-calendar-plus"></i> Añadir al calendario
+                            </button>
+                        </div>
                     </div>
                     
-                    {/* Organizer Info Card */}
-                    {event.otherData && (
+                    {/* Organizer Info */}
+                    {event.creator && (
                         <div className="card">
                             <h2 className="card-title">Organizador</h2>
-                            
-                            <div className="organizer-header">
+                            <div className="organizer-info">
                                 <div className="organizer-avatar">
-                                    <i className="fas fa-user-tie"></i>
+                                    {event.creator.photo ? (
+                                        <img src={event.creator.photo} alt="Organizador" />
+                                    ) : (
+                                        <div className="avatar-placeholder">
+                                            {event.creator.userName ? event.creator.userName.charAt(0).toUpperCase() : 'O'}
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="organizer-info">
-                                    <h3 className="organizer-name">{event.otherData.organizer || 'No especificado'}</h3>
-                                    <p className="organizer-role">Organizador</p>
+                                <div className="organizer-details">
+                                    <h3>{event.creator.userName || 'Organizador'}</h3>
+                                    {event.creator.email && <p><i className="far fa-envelope"></i> {event.creator.email}</p>}
+                                    {event.otherData?.contact && <p><i className="fas fa-phone"></i> {event.otherData.contact}</p>}
+                                    {event.otherData?.organizer && <p><i className="fas fa-users"></i> {event.otherData.organizer}</p>}
                                 </div>
-                            </div>
-                            
-                            <div className="organizer-details">
-                                {event.otherData.contact && (
-                                    <div className="organizer-detail">
-                                        <i className="fas fa-phone-alt"></i>
-                                        <span>{event.otherData.contact}</span>
-                                    </div>
-                                )}
-                                {event.otherData.notes && (
-                                    <div className="organizer-detail">
-                                        <i className="fas fa-sticky-note"></i>
-                                        <span>{event.otherData.notes}</span>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     )}
                     
-                    {/* Sub-events Section */}
-                    {event.subeventIds && event.subeventIds.length > 0 && (
-                        <div className="subevents-section">
-                            <h2 className="subevents-title">Sub-eventos</h2>
-                            
-                            <div className="carousel-container">
-                                <button className="carousel-nav-button carousel-prev" onClick={scrollSubeventsLeft}>
-                                    <i className="fas fa-chevron-left"></i>
-                                </button>
-                                <button className="carousel-nav-button carousel-next" onClick={scrollSubeventsRight}>
-                                    <i className="fas fa-chevron-right"></i>
-                                </button>
-                                
-                                <div className="carousel-wrapper" ref={subeventsCarouselRef}>
-                                    <SubEventsComponent 
-                                        subEvents={event.subeventIds} 
-                                        customRender={(subEvent) => (
-                                            <div className="subevent-card">
-                                                <div className="subevent-images">
-                                                    <div className="subevent-images-container">
-                                                        {subEvent.mainImages && subEvent.mainImages.length > 0 ? (
-                                                            <>
-                                                                <img 
-                                                                    src={subEvent.mainImages[0].url} 
-                                                                    alt={subEvent.title} 
-                                                                    className="subevent-image"
-                                                                    onError={(e) => { 
-                                                                        e.target.onerror = null; 
-                                                                        e.target.src = "https://placehold.co/400x300?text=Imagen+No+Disponible"; 
-                                                                    }}
-                                                                />
-                                                                {subEvent.mainImages.length > 1 ? (
-                                                                    <img 
-                                                                        src={subEvent.mainImages[1].url} 
-                                                                        alt={subEvent.title} 
-                                                                        className="subevent-image"
-                                                                        onError={(e) => { 
-                                                                            e.target.onerror = null; 
-                                                                            e.target.src = "https://placehold.co/400x300?text=Imagen+No+Disponible"; 
-                                                                        }}
-                                                                    />
-                                                                ) : (
-                                                                    <img 
-                                                                        src={subEvent.mainImages[0].url} 
-                                                                        alt={subEvent.title} 
-                                                                        className="subevent-image"
-                                                                        onError={(e) => { 
-                                                                            e.target.onerror = null; 
-                                                                            e.target.src = "https://placehold.co/400x300?text=Imagen+No+Disponible"; 
-                                                                        }}
-                                                                    />
-                                                                )}
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <img 
-                                                                    src="https://placehold.co/400x300?text=Imagen+No+Disponible" 
-                                                                    alt="Imagen no disponible" 
-                                                                    className="subevent-image"
-                                                                />
-                                                                <img 
-                                                                    src="https://placehold.co/400x300?text=Imagen+No+Disponible" 
-                                                                    alt="Imagen no disponible" 
-                                                                    className="subevent-image"
-                                                                />
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <div className="subevent-content">
-                                                    <h3 className="subevent-title">{subEvent.title}</h3>
-                                                    <p className="subevent-description">{subEvent.description || 'Sin descripción'}</p>
-                                                    <div className="subevent-meta">
-                                                        <div className="subevent-meta-item">
-                                                            <i className="far fa-calendar-alt"></i>
-                                                            <span>{formatShortDate(subEvent.start)}</span>
-                                                        </div>
-                                                        <div className="subevent-meta-item">
-                                                            <i className="fas fa-map-marker-alt"></i>
-                                                            <span>{subEvent.location?.address || 'Ubicación no especificada'}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-                                    />
-                                </div>
+                    {/* Additional Info */}
+                    {event.otherData && Object.keys(event.otherData).length > 0 && (
+                        <div className="card">
+                            <h2 className="card-title">Información adicional</h2>
+                            <div className="additional-info">
+                                {event.otherData.notes && (
+                                    <div className="info-item">
+                                        <h3><i className="fas fa-clipboard"></i> Notas</h3>
+                                        <p>{event.otherData.notes}</p>
+                                    </div>
+                                )}
+                                {/* Agregar más campos de otherData según sea necesario */}
                             </div>
                         </div>
                     )}
                 </div>
             </div>
-            
-            <Lightbox 
-                open={lightboxOpen} 
-                close={closeLightbox} 
-                slides={lightboxSlides} 
-                index={lightboxIndex} 
-                plugins={[Video]} 
-            />
+
+            {/* Lightbox para galería */}
+            {lightboxOpen && (
+                <Lightbox
+                    open={lightboxOpen}
+                    close={closeLightbox}
+                    slides={lightboxSlides}
+                    index={lightboxIndex}
+                    plugins={[Video]}
+                />
+            )}
         </div>
     );
 };

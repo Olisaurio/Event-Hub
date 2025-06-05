@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import Sidebar from '../components/sidebar';
-import Header from '../components/Header';
 import '../EventHub-Styles/EventsPage.css';
 import { withCheckAuth } from "../Utils/CheckAuth";
 
@@ -148,9 +146,7 @@ const EventsPage = () => {
   if (isLoading && events.length === 0) { 
     return (
       <div className="app-container">
-        <Sidebar />
         <div className="main-content">
-          <Header />
           <div className="loading-container"><div className="loading-spinner"></div>Cargando eventos...</div>
         </div>
       </div>
@@ -159,9 +155,7 @@ const EventsPage = () => {
 
   return (
     <div className="app-container">
-      <Sidebar />
       <div className="main-content events-page-content">
-        <Header />
         <h1 className="events-page-title">
           Eventos {navigateCategory ? `en ${navigateCategory}` : ''} 
           {selectedCity ? `en ${selectedCity}` : selectedDepartment ? `en ${selectedDepartment}` : 'Cercanos'}

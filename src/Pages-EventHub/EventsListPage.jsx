@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import CategoryFilterBar from '../components/CategoryFilterBar';
+import CategoryFilterBar from '../components/CategoryGridSection';
 import EventCard from '../components/EventCard';
 import '../EventHub-Styles/EventsListPage.css';
 import { withCheckAuth } from "../Utils/CheckAuth";// Importar el HOC de autenticación
@@ -24,23 +24,6 @@ const EventsListPage = () => {
   const [activeCategory, setActiveCategory] = useState(query.get('category') || 'all');
   
   // Lista de categorías disponibles
-  const categories = [
-    { name: 'Todos', id: 'all' },
-    { name: 'Música', id: 'Música' },
-    { name: 'Arte y Cultura', id: 'Arte y Cultura' },
-    { name: 'Comida y Bebida', id: 'Comida y Bebida' },
-    { name: 'Deportes', id: 'Deportes' },
-    { name: 'Negocios', id: 'Negocios' },
-    { name: 'Tecnología', id: 'Tecnología' },
-    { name: 'Aire Libre', id: 'Aire Libre' },
-    { name: 'Comunidad', id: 'Comunidad' },
-    { name: 'Familia', id: 'Familia' },
-    { name: 'Cine', id: 'Cine' },
-    { name: 'Moda', id: 'Moda' },
-    { name: 'Educación', id: 'Educación' },
-    { name: 'Salud y Bienestar', id: 'Salud y Bienestar' },
-    { name: 'Otros', id: 'Otros' }
-  ];
 
   // Cargar eventos desde la API
   useEffect(() => {
