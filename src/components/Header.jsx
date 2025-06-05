@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import "../Components-styles/Header.css"; // Actualizado
 
+
 const Header = () => {
+    const user = localStorage.getItem("userName") || "Usuario";
+    const [userName, setUserName] = useState(user);
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 px-4 sm:px-8 py-4 flex items-center justify-between flex-wrap">
           <div className="flex items-center space-x-4 sm:space-x-8 w-full sm:w-auto justify-between sm:justify-start">
@@ -26,7 +29,7 @@ const Header = () => {
                 <span className="text-white text-sm font-semibold">JD</span>
               </div>
               <span className="text-gray-700 font-medium hidden sm:inline">
-                Juan Pérez
+                {userName}
               </span>
             </div>
           </div>
