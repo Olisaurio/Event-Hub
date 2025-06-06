@@ -88,7 +88,7 @@ const NewPassword = () => {
   // Validar la contraseña
   const validatePassword = (password) => {
     // Mínimo 8 caracteres, al menos una letra mayúscula, una minúscula, un número y un carácter especial
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&+\-_#])[A-Za-z\d@$!%*?&+\-_#]{8,20}$/;
     
     if (!password) {
       return 'La contraseña es obligatoria.';
@@ -194,7 +194,7 @@ const NewPassword = () => {
 
           <div className="mt-6 text-center">
             <a
-              href="/login"
+              href="/"
               className="text-white hover:text-white text-sm font-medium hover:underline transition-colors duration-200"
             >
               ¿Recordaste tu contraseña? Iniciar Sesión
