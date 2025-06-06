@@ -196,14 +196,16 @@ const MyEvents = () => {
               to={`/event/${event.id}`}
               className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer group block mb-8"
             >
-              <img
-                src={event.mainImages && event.mainImages.length > 0 ? event.mainImages[0].url : 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=200&fit=crop'}
-                alt={event.title}
-                className="w-full h-48 object-cover rounded-t-xl group-hover:scale-105 transition-transform duration-300"
-                onError={(e) => {
-                  e.target.src = 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=200&fit=crop';
-                }}
-              />
+              <div className="w-full h-48 overflow-hidden rounded-t-xl">
+                <img
+                  src={event.mainImages && event.mainImages.length > 0 ? event.mainImages[0].url : 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=200&fit=crop'}
+                  alt={event.title}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  onError={(e) => {
+                    e.target.src = 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=200&fit=crop';
+                  }}
+                />
+              </div>
               <div className="p-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(event.categoria?.nombreCategoria || 'Otros')}`}>
