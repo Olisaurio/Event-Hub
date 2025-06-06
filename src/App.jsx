@@ -6,13 +6,19 @@ import CreateEvent from './components/CreateEvent.jsx';
 import DoubleSliderForm from './assets/DoubleSliderForm/DoubleSliderForm';
 import Layout from './components/Layout.jsx';
 import "./App.css";
+import RecoveryPassword from './assets/recoveryPassword/recoveryPassword.jsx';
+import NewPassword from './assets/recoveryPassword/newPassword.jsx';
+
+
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Rutas fuera del layout (login/registro) */}
+        {/* Rutas fuera del layout (login/registro/recovery-password/new-password) */}
         <Route path="/" element={<DoubleSliderForm />} />
+        <Route path="/recovery-password" element={<RecoveryPassword />} />
+        <Route path="/new-password" element={<NewPassword />} />
 
         {/* Rutas dentro del layout */}
         <Route element={<Layout />}>

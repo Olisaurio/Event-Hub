@@ -1,5 +1,3 @@
-// notion de endpoints https://www.notion.so/Gu-a-Completa-de-Endpoints-EventHub-API-206b8d1bc34080e7ba68cf1798e4367c#207b8d1bc340804484aedbb08ee6e2ff
-
 import React, { useState, useRef, useEffect } from "react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -1061,13 +1059,15 @@ const CreateEvent = () => {
                 organizer: formData.eventOrganizer,
                 contact: formData.contactPhone || "",
                 notes: `Sub-evento de ${formData.eventName}`
-              }
+              },
+              // Añadir categoriaId usando la categoría del evento principal
+              categoriaId: formData.eventCategory
               // Añadir otros campos necesarios para sub-eventos según la API
             };
             
             // Enviar sub-evento a la API
             const subEventResponse = await fetch(
-              "https://backendeventhub.onrender.com/api/events", // Asumiendo que el mismo endpoint crea sub-eventos si tiene eventoPrincipalId
+              "https://backendeventhub.onrender.com/api/subevents", // Asumiendo que el mismo endpoint crea sub-eventos si tiene eventoPrincipalId
               {
                 method: "POST",
                 headers: {
@@ -1118,7 +1118,7 @@ const CreateEvent = () => {
 
       // Redirigir a la página de detalles del evento principal
       alert("¡Evento creado exitosamente!");
-      navigate(`/events/${eventoPrincipalId}`);
+      navigate(`/event/${eventoPrincipalId}`);
       
     } catch (error) {
       console.error("Error al crear el evento:", error);

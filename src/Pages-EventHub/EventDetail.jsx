@@ -351,13 +351,15 @@ const EventDetail = () => {
     const headerImage = event.mainImages && Array.isArray(event.mainImages) && event.mainImages.length > 0 && event.mainImages[0]?.url
         ? event.mainImages[0].url 
         : "https://placehold.co/1200x300?text=Sin+Imagen+Principal";
+        
+    console.log("Header Image:", headerImage);
 
     return (
         <div>
 
             {/* Event Header */}
             <div className="event-header" style={{
-                backgroundImage: `linear-gradient(to right, rgba(191, 215, 255, 0.9), rgba(186, 208, 255, 0.9)), url(${headerImage})`,
+                backgroundImage: `url(${headerImage})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
             }}>
@@ -433,6 +435,8 @@ const EventDetail = () => {
                     
                     {/* Location Section */}
                     <EventMap position={event.location} />
+
+                    <SubEventsComponent eventId={event.id} />
                     
                     {/* Ticket Info Card */}
                     <div className="card">
@@ -501,7 +505,6 @@ const EventDetail = () => {
                                     <h3>{event.creator.userName || 'Organizador'}</h3>
                                     {event.creator.email && <p><i className="far fa-envelope"></i> {event.creator.email}</p>}
                                     {event.otherData?.contact && <p><i className="fas fa-phone"></i> {event.otherData.contact}</p>}
-                                    {event.otherData?.organizer && <p><i className="fas fa-users"></i> {event.otherData.organizer}</p>}
                                 </div>
                             </div>
                         </div>

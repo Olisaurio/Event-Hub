@@ -107,13 +107,13 @@ const Sidebar = () => {
                 </li>
               </ul>
               <div className="md:mt-auto md:pt-8 hidden md:block">
-                <a
-                  href="#"
-                  className="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors duration-200"
+                <div
+                  onClick={handleLogout}
+                  className="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors duration-200 cursor-pointer"
                 >
                   <span className="material-symbols-outlined">logout</span>
                   <span className="font-medium">Cerrar Sesión</span>
-                </a>
+                </div>
               </div>
             </nav>
           </aside>

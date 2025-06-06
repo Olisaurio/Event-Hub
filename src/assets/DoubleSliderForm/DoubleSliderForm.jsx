@@ -300,7 +300,7 @@ if (!token || !token.includes(".")) throw new Error("Token inválido");
                           />
                           <span className="ml-2 text-white/70 text-sm">Recordarme</span>
                         </label>
-                        <a href="#" className="text-purple-300 hover:text-purple-200 text-sm transition-colors duration-300">¿Olvidaste tu contraseña?</a>
+                        <a href="recovery-password" className="text-purple-300 hover:text-purple-200 text-sm transition-colors duration-300">¿Olvidaste tu contraseña?</a>
                       </div>
                       
                       <button 
