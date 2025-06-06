@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 // Función para decodificar JWT manualmente sin dependencias externas
 const decodeJWT = (token) => {
@@ -132,46 +133,62 @@ const NewPassword = () => {
     setMessage({ type: '', text: '' });
     
     try {
-      const response = await fetch('https://backendeventhub.onrender.com/api/password/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await axios.post(
+        'https://backendeventhub.onrender.com/password/reset-password',
+        {
+          token: token,
+          newPassword: newPassword
         },
-        body: JSON.stringify({
-          token,
-          newPassword
-        }),
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          timeout: 10000, // 10 segundos
+        }
+      );
+      
+      console.log('Response completa:', response);
+      console.log('Data de la respuesta:', response.data);
+      
+      // Con axios, la respuesta exitosa (status 200-299) llega aquí directamente
+      setMessage({
+        type: 'success',
+        text: 'Contraseña restablecida con éxito. Serás redirigido a la página de inicio de sesión.'
       });
       
-      const data = await response.json();
+      // Redirigir al login después de 3 segundos
+      setTimeout(() => {
+        navigate('/');
+      }, 3000);
       
-      if (response.ok) {
-        setMessage({
-          type: 'success',
-          text: 'Contraseña restablecida con éxito. Serás redirigido a la página de inicio de sesión.'
-        });
-        
-        // Redirigir al login después de 3 segundos
-        setTimeout(() => {
-          navigate('/');
-        }, 3000);
-      } else {
-        setMessage({
-          type: 'error',
-          text: data.message || 'Error al restablecer la contraseña. Inténtalo de nuevo.'
-        });
-      }
     } catch (error) {
       console.error('Error al restablecer la contraseña:', error);
-      setMessage({
-        type: 'error',
-        text: 'Error de conexión. Por favor, verifica tu conexión a internet e inténtalo de nuevo.'
-      });
+      
+      // Axios lanza errores para status 4xx y 5xx
+      if (error.response) {
+        // El servidor respondió con un error
+        const errorMessage = error.response.data || 'Error al restablecer la contraseña. Inténtalo de nuevo.';
+        setMessage({
+          type: 'error',
+          text: typeof errorMessage === 'string' ? errorMessage : 'Error al restablecer la contraseña.'
+        });
+      } else if (error.request) {
+        // No se recibió respuesta
+        setMessage({
+          type: 'error',
+          text: 'Error de conexión. Por favor, verifica tu conexión a internet e inténtalo de nuevo.'
+        });
+      } else {
+        // Error en la configuración de la request
+        setMessage({
+          type: 'error',
+          text: 'Error interno. Por favor, inténtalo de nuevo.'
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div id="webcrumbs">
       <div className="w-full min-h-screen bg-gradient-to-br from-purple-900 via-purple-700 to-pink-600 flex items-center justify-center p-4">
