@@ -32,6 +32,7 @@ function App() {
           <Route path="/invitations" element={<div>Eventos a los que me invitan</div>} />
           <Route path="/agenda" element={<div>Mi agenda</div>} />
           <Route path="/assistance" element={<Participate />} />
+          <Route path="/sub-creator" element={<div>SubCreador</div>} />
         </Route>
       </Routes>
     </BrowserRouter>
