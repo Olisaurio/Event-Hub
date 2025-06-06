@@ -10,14 +10,15 @@ import RecoveryPassword from './assets/recoveryPassword/recoveryPassword.jsx';
 import NewPassword from './assets/recoveryPassword/newPassword.jsx';
 import MyEvents from './Pages-EventHub/myEvents.jsx';
 import Participate from './Pages-EventHub/participate.jsx';
-
+import LandingPage from './assets/landingPage/landingPage.jsx';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         {/* Rutas fuera del layout (login/registro/recovery-password/new-password) */}
-        <Route path="/" element={<DoubleSliderForm />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/loginAndRegister" element={<DoubleSliderForm />} />
         <Route path="/recovery-password" element={<RecoveryPassword />} />
         <Route path="/new-password" element={<NewPassword />} />
 
