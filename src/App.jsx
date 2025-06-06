@@ -8,7 +8,8 @@ import Layout from './components/Layout.jsx';
 import "./App.css";
 import RecoveryPassword from './assets/recoveryPassword/recoveryPassword.jsx';
 import NewPassword from './assets/recoveryPassword/newPassword.jsx';
-
+import MyEvents from './Pages-EventHub/myEvents.jsx';
+import Participate from './Pages-EventHub/participate.jsx';
 
 
 function App() {
@@ -27,9 +28,10 @@ function App() {
           <Route path="/events" element={<EventsListPage />} /> 
           <Route path="/create-event" element={<CreateEvent />} />
           {/* Nuevas rutas para las funcionalidades solicitadas */}
-          <Route path="/my-events" element={<div>Mis eventos inscritos</div>} />
+          <Route path="/my-events" element={<MyEvents/>} />
           <Route path="/invitations" element={<div>Eventos a los que me invitan</div>} />
           <Route path="/agenda" element={<div>Mi agenda</div>} />
+          <Route path="/assistance" element={<Participate />} />
         </Route>
       </Routes>
     </BrowserRouter>

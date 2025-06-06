@@ -11,7 +11,7 @@ body {
     position: relative;
     height: 400px;
     margin-bottom: 2rem;
-    width: 90%;
+    width: 100%;
     margin: 0 auto 2rem;
     background-size: cover;
     background-position: center;
@@ -157,7 +157,6 @@ body {
 /* Main Content */
 .main-container {
     width: 100%;
-    max-width: 1200px;
     margin: 0 auto;
     padding: 0 1.5rem;
     box-sizing: border-box;
@@ -169,8 +168,8 @@ body {
     flex-direction: column;
     gap: 2rem;
     width: 100%;
-    max-width: 900px;
     margin: 0 auto;
+    margin-bottom: 1rem;
 }
 
 /* Card Styles */

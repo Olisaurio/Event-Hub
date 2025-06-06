@@ -5,6 +5,7 @@ import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import { withCheckAuth } from "../Utils/CheckAuth";
 import { useNavigate } from "react-router-dom";
+import Footer from "../components/footer.jsx";
 
 // Solución al problema de iconos en Leaflet con React
 delete L.Icon.Default.prototype._getIconUrl;
@@ -2275,6 +2276,7 @@ const CreateEvent = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
