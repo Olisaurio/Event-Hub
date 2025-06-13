@@ -359,3 +359,4 @@ const Header = () => {
 };
 
 export default Header;
+// Este componente Header incluye un campo de búsqueda, un menú de usuario y un botón de notificaciones.

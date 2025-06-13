@@ -417,3 +417,4 @@ const UserProfile = () => {
 };
 
 export default UserProfile;
+// Este componente UserProfile muestra un perfil de usuario con secciones editables para información personal, contacto y ubicación.
