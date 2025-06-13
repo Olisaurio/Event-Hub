@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import EventHub from './Pages-EventHub/EventHub';
 import EventDetail from './Pages-EventHub/EventDetail';
@@ -11,6 +12,7 @@ import NewPassword from './assets/recoveryPassword/newPassword.jsx';
 import MyEvents from './Pages-EventHub/myEvents.jsx';
 import Participate from './Pages-EventHub/participate.jsx';
 import LandingPage from './assets/landingPage/landingPage.jsx';
+import UserProfile from './components/UserProfile.jsx';
 
 function App() {
   return (
@@ -34,6 +36,8 @@ function App() {
           <Route path="/agenda" element={<div>Mi agenda</div>} />
           <Route path="/assistance" element={<Participate />} />
           <Route path="/sub-creator" element={<div>SubCreador</div>} />
+          {/* NUEVA RUTA AGREGADA: Perfil de usuario */}
+          <Route path="/profile" element={<UserProfile />} />
         </Route>
       </Routes>
     </BrowserRouter>
