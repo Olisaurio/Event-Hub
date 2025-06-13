@@ -1,9 +1,15 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import "../Components-styles/Sidebar.css";
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Función para determinar si un enlace está activo
+  const isActive = (path) => {
+    return location.pathname === path ? "bg-primary-50 text-primary-700" : "text-gray-600 hover:bg-gray-100";
+  };
 
   // Función para cerrar sesión
   const handleLogout = () => {
@@ -16,108 +22,72 @@ const Sidebar = () => {
     navigate("/");
   };
 
-  const menuItems = [
-    { id: "home", label: "Home", path: "/EventHub" },
-    { id: "myEvents", label: "Mis Eventos", path: "/my-events" },
-    { id: "invitations", label: "Invitaciones", path: "/invitations" },
-    { id: "create", label: "Crear Evento", path: "/create-event" },
-    { id: "agenda", label: "Mi Agenda", path: "/agenda" },
-  ];
-
   return (
-    // <div className="sidebar">
-    //   {menuItems.map(item => (
-    //     <Link
-    //       to={item.path}
-    //       key={item.id}
-    //       className="sidebar-item-link"
-    //       style={{ textDecoration: 'none', color: 'inherit' }}
-    //     >
-    //       <div className="sidebar-item">
-    //         <span className="sidebar-icon">{item.icon}</span>
-    //         <span>{item.label}</span>
-    //       </div>
-    //     </Link>
-    //   ))}
-
-    //   {/* Botón de cerrar sesión en la parte inferior */}
-    //   <div className="sidebar-logout">
-    //     <div
-    //       className="sidebar-item"
-    //       onClick={handleLogout}
-    //       style={{ cursor: 'pointer' }}
-    //     >
-    //       <span className="sidebar-icon">🚪</span>
-    //       <span>Cerrar Sesión</span>
-    //     </div>
-    //   </div>
-    // </div>
-
     <aside className="w-full md:w-64 bg-white shadow-sm md:h-screen md:sticky top-0 border-b md:border-b-0 md:border-r border-gray-200 md:flex">
       <nav className="p-4 md:p-6 overflow-x-auto md:overflow-x-visible whitespace-nowrap md:whitespace-normal">
         <ul className="flex md:flex-col md:space-y-2 space-x-2 md:space-x-0">
           <li>
-            <a
-              href="/EventHub"
-              className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-primary-50 text-primary-700 hover:bg-primary-100 transition-colors duration-200 min-w-[120px] md:min-w-0"
+            <Link
+              to="/EventHub"
+              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 min-w-[120px] md:min-w-0 ${isActive("/EventHub")}`}
             >
               <span className="material-symbols-outlined">home</span>
               <span className="font-medium">Home</span>
-            </a>
+            </Link>
           </li>
           <li>
-            <a
-              href="/my-events"
-              className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors duration-200 min-w-[120px] md:min-w-0"
+            <Link
+              to="/my-events"
+              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 min-w-[120px] md:min-w-0 ${isActive("/my-events")}`}
             >
               <span className="material-symbols-outlined">event</span>
               <span className="font-medium">Mis Eventos</span>
-            </a>
+            </Link>
           </li>
           <li>
-            <a
-              href="/assistance"
-              className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors duration-200 min-w-[120px] md:min-w-0"
+            <Link
+              to="/assistance"
+              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 min-w-[120px] md:min-w-0 ${isActive("/assistance")}`}
             >
-              <span class="material-symbols-outlined">token</span>
+              <span className="material-symbols-outlined">token</span>
               <span className="font-medium">Participo</span>
-            </a>
+            </Link>
           </li>
           <li>
-            <a
-              href="/invitations"
-              className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors duration-200 min-w-[120px] md:min-w-0"
+            <Link
+              to="/invitations"
+              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 min-w-[120px] md:min-w-0 ${isActive("/invitations")}`}
             >
               <span className="material-symbols-outlined">mail</span>
               <span className="font-medium">Invitaciones</span>
-            </a>
+            </Link>
           </li>
           <li>
-            <a
-              href="/sub-creator"
-              className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors duration-200 min-w-[120px] md:min-w-0"
+            <Link
+              to="/sub-creator"
+              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 min-w-[120px] md:min-w-0 ${isActive("/sub-creator")}`}
             >
               <span className="material-symbols-outlined">filter_list</span>
               <span className="font-medium">SubCreador</span>
-            </a>
+            </Link>
           </li>
           <li>
-            <a
-              href="/create-event"
-              className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors duration-200 min-w-[120px] md:min-w-0"
+            <Link
+              to="/create-event"
+              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 min-w-[120px] md:min-w-0 ${isActive("/create-event")}`}
             >
               <span className="material-symbols-outlined">add_circle</span>
               <span className="font-medium">Crear Evento</span>
-            </a>
+            </Link>
           </li>
           <li>
-            <a
-              href="/agenda"
-              className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors duration-200 min-w-[120px] md:min-w-0"
+            <Link
+              to="/agenda"
+              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 min-w-[120px] md:min-w-0 ${isActive("/agenda")}`}
             >
               <span className="material-symbols-outlined">calendar_month</span>
               <span className="font-medium">Agenda</span>
-            </a>
+            </Link>
           </li>
         </ul>
         <div className="md:mt-auto md:pt-8 hidden md:block">

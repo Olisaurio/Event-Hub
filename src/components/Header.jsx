@@ -174,7 +174,7 @@ const Header = () => {
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 px-4 sm:px-8 py-4 flex items-center justify-between flex-wrap relative">
       <div className="flex items-center space-x-4 sm:space-x-8 w-full sm:w-auto justify-between sm:justify-start">
-        <h1 className="text-2xl font-bold text-primary-600">EventHub</h1>
+        <h1 className="text-2xl font-bold">EventHub</h1>
         
         {/* Contenedor de búsqueda */}
         <div className="relative w-full sm:w-auto mt-4 sm:mt-0 order-3 sm:order-2" ref={searchRef}>
