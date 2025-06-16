@@ -11,6 +11,7 @@ import NewPassword from './assets/recoveryPassword/newPassword.jsx';
 import MyEvents from './Pages-EventHub/myEvents.jsx';
 import Participate from './Pages-EventHub/participate.jsx';
 import LandingPage from './assets/landingPage/landingPage.jsx';
+import MyAgenda from './Pages-EventHub/MyAgenda.jsx';
 
 function App() {
   return (
@@ -31,7 +32,7 @@ function App() {
           {/* Nuevas rutas para las funcionalidades solicitadas */}
           <Route path="/my-events" element={<MyEvents/>} />
           <Route path="/invitations" element={<div>Eventos a los que me invitan</div>} />
-          <Route path="/agenda" element={<div>Mi agenda</div>} />
+          <Route path="/agenda" element={<MyAgenda/>} />
           <Route path="/assistance" element={<Participate />} />
           <Route path="/sub-creator" element={<div>SubCreador</div>} />
         </Route>
