@@ -291,7 +291,7 @@ const CreateEvent = () => {
     mainImageFiles: [null, null],
 
     // Paso 3: Galería de imágenes y video
-    galleryImageFiles: [],
+    galleryImageFiles: [], // La galería es opcional, no requerida
     eventVideo: null,
 
     // Paso 4: Ubicación
@@ -424,18 +424,14 @@ const CreateEvent = () => {
         break;
 
       case 2: // Imágenes principales
-        const hasMainImage = formData.mainImageFiles.some(
-          (img) => img !== null
-        );
-        if (!hasMainImage)
-          newErrors.mainImages = "Al menos una imagen principal es requerida.";
+        // Validar que al menos una imagen principal esté cargada
+        if (!formData.mainImageFiles[0] || !formData.mainImageFiles[0].file) {
+          newErrors.mainImages = "Debe subir al menos una imagen principal.";
+        }
         break;
 
-      case 3: // Galería de imágenes
-        if (formData.galleryImageFiles.length < 5) {
-          newErrors.galleryImages =
-            "Se requieren al menos 5 imágenes para la galería.";
-        }
+      case 3: // Galería de imágenes (opcional)
+        // La galería es opcional, no se requiere validar
         break;
 
       case 4: // Ubicación
@@ -549,11 +545,13 @@ const CreateEvent = () => {
           if (!formData.eventType) stepErrors.eventType = "El tipo de evento es requerido.";
           break;
         case 2: // Imágenes principales
-          const hasMainImage = formData.mainImageFiles.some(img => img !== null);
-          if (!hasMainImage) stepErrors.mainImages = "Al menos una imagen principal es requerida.";
+          // Validar que al menos una imagen principal esté cargada
+          if (!formData.mainImageFiles[0] || !formData.mainImageFiles[0].file) {
+            stepErrors.mainImages = "Debe subir al menos una imagen principal.";
+          }
           break;
-        case 3: // Galería de imágenes
-          if (formData.galleryImageFiles.length < 5) stepErrors.galleryImages = "Se requieren al menos 5 imágenes para la galería.";
+        case 3: // Galería de imágenes (opcional)
+          // La galería es opcional, no se requiere validar
           break;
         case 4: // Ubicación
           if (!formData.eventLocation.trim()) stepErrors.eventLocation = "La dirección del evento es requerida.";
