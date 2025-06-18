@@ -2,6 +2,8 @@ import React from 'react';
 import Header from './Header.jsx';
 import Sidebar from './sidebar.jsx';
 import { Outlet } from 'react-router-dom';
+import Footer from './footer.jsx';
+
 
 export default function Layout() {
   return (
@@ -13,6 +15,7 @@ export default function Layout() {
           <Outlet /> {/* Aquí se renderizan las subrutas */}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

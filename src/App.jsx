@@ -12,6 +12,10 @@ import MyEvents from './Pages-EventHub/myEvents.jsx';
 import Participate from './Pages-EventHub/participate.jsx';
 import LandingPage from './assets/landingPage/landingPage.jsx';
 import MyInvitations from './components/MyInvitations.jsx';
+import MyInvitationsSubCreator from './components/myInvitations-subCreator.jsx'
+import Footer from './components/footer.jsx';
+
+
 
 
 function App() {
@@ -35,7 +39,7 @@ function App() {
           <Route path="/invitations" element={<MyInvitations />} />
           <Route path="/agenda" element={<div>Mi agenda</div>} />
           <Route path="/assistance" element={<Participate />} />
-          <Route path="/sub-creator" element={<div>SubCreador</div>} />
+          <Route path="/sub-creator" element={<MyInvitationsSubCreator />} />
         </Route>
       </Routes>
     </BrowserRouter>
