@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import EventHub from './Pages-EventHub/EventHub';
 import EventDetail from './Pages-EventHub/EventDetail';
@@ -11,9 +12,15 @@ import NewPassword from './assets/recoveryPassword/newPassword.jsx';
 import MyEvents from './Pages-EventHub/myEvents.jsx';
 import Participate from './Pages-EventHub/participate.jsx';
 import LandingPage from './assets/landingPage/landingPage.jsx';
+
+import MyAgenda from './Pages-EventHub/MyAgenda.jsx';
+
+
+import UserProfile from './components/UserProfile.jsx';
+
 import MyInvitations from './components/MyInvitations.jsx';
 import MyInvitationsSubCreator from './components/myInvitations-subCreator.jsx'
-import Footer from './components/footer.jsx';
+
 
 
 
@@ -36,10 +43,16 @@ function App() {
           <Route path="/create-event" element={<CreateEvent />} />
           {/* Nuevas rutas para las funcionalidades solicitadas */}
           <Route path="/my-events" element={<MyEvents/>} />
+
+          <Route path="/invitations" element={<div>Eventos a los que me invitan</div>} />
+          <Route path="/agenda" element={<MyAgenda/>} />
           <Route path="/invitations" element={<MyInvitations />} />
           <Route path="/agenda" element={<div>Mi agenda</div>} />
+
           <Route path="/assistance" element={<Participate />} />
+
           <Route path="/sub-creator" element={<MyInvitationsSubCreator />} />
+          <Route path="/profile" element={<UserProfile />} />
         </Route>
       </Routes>
     </BrowserRouter>

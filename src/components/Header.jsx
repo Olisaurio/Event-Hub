@@ -10,8 +10,14 @@ const Header = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [searchError, setSearchError] = useState(null);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  // CORREGIDO: Cambiar el nombre del estado para que coincida
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   
   const searchRef = useRef(null);
+  const profileDropdownRef = useRef(null);
+  // CORREGIDO: Cambiar el nombre de la referencia para que coincida
+  const userMenuRef = useRef(null);
   const navigate = useNavigate();
 
   // Función para formatear el rango de fechas
@@ -100,11 +106,18 @@ const Header = () => {
     return () => clearTimeout(timeoutId);
   }, [searchText]);
 
-  // Cerrar resultados al hacer click fuera
+  // Cerrar resultados y dropdown al hacer click fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowResults(false);
+      }
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        setShowProfileDropdown(false);
+      }
+      // CORREGIDO: Agregar manejo para el menú de usuario
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false);
       }
     };
 
@@ -131,6 +144,31 @@ const Header = () => {
     setSearchText('');
     setSearchResults([]);
     setShowResults(false);
+  };
+
+  // CORREGIDO: Agregar función para alternar el menú de usuario
+  const toggleUserMenu = () => {
+    setIsUserMenuOpen(!isUserMenuOpen);
+  };
+
+  // CORREGIDO: Agregar función para manejar el perfil
+  const handleProfile = () => {
+    setIsUserMenuOpen(false);
+    navigate('/profile');
+  };
+
+  // Navegar al perfil
+  const goToProfile = () => {
+    navigate('/profile');
+    setShowProfileDropdown(false);
+  };
+
+  // Cerrar sesión
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/');
+    setShowProfileDropdown(false);
+    setIsUserMenuOpen(false); // CORREGIDO: También cerrar el menú de usuario
   };
 
   return (
@@ -250,13 +288,70 @@ const Header = () => {
         <span className="material-symbols-outlined text-gray-600 cursor-pointer hover:text-primary-600 transition-colors duration-200">
           notifications
         </span>
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors duration-200 cursor-pointer">
-            <span className="text-white text-sm font-semibold">JD</span>
+        
+        {/* MENÚ DE USUARIO CORREGIDO */}
+        <div className="relative" ref={userMenuRef}>
+          <div 
+            className="flex items-center space-x-2 cursor-pointer"
+            onClick={toggleUserMenu}
+          >
+            <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors duration-200">
+              <span className="text-white text-sm font-semibold">JD</span>
+            </div>
+            <span className="text-gray-700 font-medium hidden sm:inline">
+              {userName}
+            </span>
+            {/* Flecha indicadora */}
+            <span className={`material-symbols-outlined text-gray-400 transition-transform duration-200 ${
+              isUserMenuOpen ? 'rotate-180' : ''
+            }`}>
+              expand_more
+            </span>
           </div>
-          <span className="text-gray-700 font-medium hidden sm:inline">
-            {userName}
-          </span>
+
+          {/* Menú desplegable */}
+          {isUserMenuOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+              {/* Información del usuario */}
+              <div className="px-4 py-2 border-b border-gray-100">
+                <p className="text-sm font-medium text-gray-900">{userName}</p>
+                <p className="text-xs text-gray-600">Administrar cuenta</p>
+              </div>
+              
+              {/* Mi Perfil */}
+              <button
+                onClick={handleProfile}
+                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                <span className="material-symbols-outlined text-gray-500 mr-3 text-base">person</span>
+                Mi Perfil
+              </button>
+              
+              {/* Configuración */}
+              <button
+                onClick={() => {
+                  setIsUserMenuOpen(false);
+                  navigate('/settings');
+                }}
+                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                <span className="material-symbols-outlined text-gray-500 mr-3 text-base">settings</span>
+                Configuración
+              </button>
+              
+              {/* Separador */}
+              <div className="border-t border-gray-100 mt-1 pt-1">
+                {/* Cerrar Sesión */}
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-red-600 mr-3 text-base">logout</span>
+                  Cerrar Sesión
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>
@@ -264,3 +359,4 @@ const Header = () => {
 };
 
 export default Header;
+// Este componente Header incluye un campo de búsqueda, un menú de usuario y un botón de notificaciones.
