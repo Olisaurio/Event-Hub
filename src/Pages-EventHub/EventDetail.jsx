@@ -12,14 +12,11 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
 // Importar utilidades y componentes nuevos
-import { EventCreatorUtils } from "../Utils/EventCreatorUtils"; // Importar el objeto completo
+import { EventCreatorUtils } from "../Utils/EventCreatorUtils";
 import InvitationComponent from "../components/InvitationComponent";
 
 import SubEventsComponent from "../components/SubEvents";
 import { withCheckAuth } from "../Utils/CheckAuth";
-
-// Importar estilos mejorados
-import "../EventHub-Styles/EventDetail.css";
 
 // Fix Default Leaflet Icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -52,14 +49,14 @@ const categoryColors = {
 const CategoryTags = ({ categories }) => {
   if (!categories || categories.length === 0) return null;
   return (
-    <div className="category-tags-container">
+    <div className="flex flex-wrap gap-3">
       {categories.map((category, index) => (
         <span
           key={index}
-          className="category-tag"
+          className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
           style={{
-            backgroundColor: categoryColors[category] || "#007bff",
-            borderColor: categoryColors[category] || "#007bff",
+            backgroundColor: categoryColors[category] || "#3b82f6",
+            borderColor: categoryColors[category] || "#2563eb",
           }}
         >
           {category}
@@ -83,10 +80,10 @@ const EventMap = ({ position }) => {
   };
 
   return (
-    <div className="event-map-card">
-      <h2 className="section-title">
-        <span className="material-symbols-outlined">location_on</span>
+    <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-50 w-full box-border mb-8">
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800 relative pb-2">
         Ubicación
+        <span className="absolute bottom-0 left-0 w-12 h-0.5 bg-gradient-to-r from-blue-500 to-blue-400 rounded-full"></span>
       </h2>
       <p className="text-gray-600 mb-6 flex items-center text-base font-medium">
         <i className="fas fa-map-marker-alt text-blue-500 mr-3"></i>
@@ -127,18 +124,17 @@ const MediaGallery = ({ mainImages, galleryImages, onMediaClick }) => {
 
   if (allMedia.length === 0) {
     return (
-      <div className="media-gallery-card">
-        <h2 className="section-title">
-          <span className="material-symbols-outlined">image</span>
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-50 w-full box-border mb-8">
+        <h2 className="text-2xl font-semibold mb-6 text-gray-800 relative pb-2">
           Galería
+          <span className="absolute bottom-0 left-0 w-12 h-0.5 bg-gradient-to-r from-blue-500 to-blue-400 rounded-full"></span>
         </h2>
-        <div className="no-media-placeholder">
+        <div className="min-w-[300px] w-[300px] rounded-xl overflow-hidden shadow-md h-56">
           <img
             src="https://placehold.co/800x500?text=Evento+Sin+Medios"
             alt="Evento sin medios"
-            className="no-media-image"
+            className="w-full h-full object-cover"
           />
-          <p>No hay imágenes ni videos disponibles para este evento.</p>
         </div>
       </div>
     );
@@ -157,39 +153,44 @@ const MediaGallery = ({ mainImages, galleryImages, onMediaClick }) => {
   };
 
   return (
-    <div className="media-gallery-card">
-      <h2 className="section-title">
-        <span className="material-symbols-outlined">image</span>
+    <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-50 w-full box-border mb-8">
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800 relative pb-2">
         Galería
+        <span className="absolute bottom-0 left-0 w-12 h-0.5 bg-gradient-to-r from-blue-500 to-blue-400 rounded-full"></span>
       </h2>
-      <div className="gallery-carousel-wrapper">
+      <div className="relative w-full mt-4">
         <button
-          className="gallery-nav-button left"
+          className="absolute top-1/2 -translate-y-1/2 z-10 bg-white/95 backdrop-blur-md rounded-full p-3 shadow-md border-0 cursor-pointer text-blue-500 flex items-center justify-center transition-all duration-300 hover:bg-white hover:scale-110 hover:text-blue-600 w-12 h-12 left-[-25px]"
           onClick={scrollLeft}
         >
           <span className="material-symbols-outlined">chevron_backward</span>
         </button>
         <button
-          className="gallery-nav-button right"
+          className="absolute top-1/2 -translate-y-1/2 z-10 bg-white/95 backdrop-blur-md rounded-full p-3 shadow-md border-0 cursor-pointer text-blue-500 flex items-center justify-center transition-all duration-300 hover:bg-white hover:scale-110 hover:text-blue-600 w-12 h-12 right-[-25px]"
           onClick={scrollRight}
         >
           <span className="material-symbols-outlined">chevron_forward</span>
         </button>
 
-        <div className="gallery-scroll-container" ref={galleryRef}>
+        <div
+          className="flex overflow-x-auto gap-5 py-4 scroll-smooth scrollbar-hide w-full"
+          ref={galleryRef}
+        >
           {allMedia.map((media, index) => (
             <div
               key={index}
-              className="gallery-item"
+              className="min-w-[300px] w-[300px] rounded-xl overflow-hidden shadow-md transition-all duration-300 hover:scale-105 hover:-translate-y-1 hover:shadow-xl h-56 cursor-pointer"
               onClick={() => onMediaClick(index)}
             >
               <img
                 src={media.src}
                 alt={`Media ${index + 1}`}
-                className="gallery-image"
+                className="w-full h-full object-cover"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = `https://placehold.co/800x500?text=Media+Error`;
+                  e.target.src = `https://placehold.co/800x500?text=Media+${
+                    index + 1
+                  }+Error`;
                 }}
               />
             </div>
@@ -211,14 +212,15 @@ const Toast = ({ message, type, onClose }) => {
   }, [onClose]);
 
   const getToastStyles = () => {
-    const baseStyles = "fixed top-5 right-5 min-w-[250px] max-w-[350px] p-4 rounded-lg shadow-lg z-[9999] flex items-center justify-between text-white font-medium animate-slide-in";
-    
+    const baseStyles =
+      "fixed top-5 right-5 min-w-[250px] max-w-[350px] p-4 rounded-lg shadow-lg z-[9999] flex items-center justify-between text-white font-medium animate-slide-in";
+
     switch (type) {
-      case 'success':
+      case "success":
         return `${baseStyles} bg-green-500 border-l-4 border-green-700`;
-      case 'error':
+      case "error":
         return `${baseStyles} bg-red-500 border-l-4 border-red-700`;
-      case 'warning':
+      case "warning":
         return `${baseStyles} bg-orange-500 border-l-4 border-orange-700`;
       default:
         return `${baseStyles} bg-blue-500 border-l-4 border-blue-700`;
@@ -269,12 +271,14 @@ const EventDetail = () => {
       try {
         const token = localStorage.getItem("token") || "";
         const eventFromState = location.state?.event;
-        
+
         if (eventFromState && eventFromState.id === id) {
           console.log("Usando evento desde estado");
           setEvent(eventFromState);
-          // Verificar si es creador usando la función isEventCreator
-          setIsCreator(EventCreatorUtils.isEventCreator(eventFromState));
+          // Verificar si es creador usando la función de debug
+          const creatorStatus =
+            EventCreatorUtils.debugValidation(eventFromState);
+          setIsCreator(creatorStatus);
         } else {
           console.log(`Fetching event ID: ${id}`);
           const response = await fetch(
@@ -294,12 +298,14 @@ const EventDetail = () => {
                 ? "Evento no encontrado."
                 : `Error ${response.status}`
             );
-          
+
           const eventData = await response.json();
           const processedEvent = processEventData(eventData);
           setEvent(processedEvent);
-          // Verificar si es creador usando la función isEventCreator
-          setIsCreator(EventCreatorUtils.isEventCreator(processedEvent));
+          // Verificar si es creador usando la función de debug
+          const creatorStatus =
+            EventCreatorUtils.debugValidation(processedEvent);
+          setIsCreator(creatorStatus);
         }
       } catch (err) {
         console.error("Error fetching event:", err);
@@ -312,42 +318,92 @@ const EventDetail = () => {
     fetchEventDetails();
   }, [id, location.state]);
 
-  // Debug adicional cuando cambia el estado (eliminado para producción)
-  /*
+  // Debug adicional cuando cambia el estado
   useEffect(() => {
     if (event) {
-      console.group(\'🔍 Debug Componente de Invitaciones\');
-      console.log(\'📝 Evento cargado:\', event);
-      console.log(\'👤 Datos en localStorage:\');
-      console.log(\'  - token:\', localStorage.getItem(\'token\') ? \'Presente\' : \'Ausente\');
-      console.log(\'  - userName:\', localStorage.getItem(\'userName\'));
-      console.log(\'  - role:\', localStorage.getItem(\'role\'));
-      
+      console.group("🔍 Debug Componente de Invitaciones");
+      console.log("📝 Evento cargado:", event);
+      console.log("👤 Datos en localStorage:");
+      console.log(
+        "  - token:",
+        localStorage.getItem("token") ? "Presente" : "Ausente"
+      );
+      console.log("  - userName:", localStorage.getItem("userName"));
+      console.log("  - role:", localStorage.getItem("role"));
+
       if (event.creator) {
-        console.log(\'👨‍💼 Creador del evento:\', event.creator);
-        console.log(\'🔗 Comparación:\');
-        console.log(\'  - Usuario actual:\', localStorage.getItem(\'userName\'));
-        console.log(\'  - Creador evento:\', event.creator.userName);
-        console.log(\'  - ¿Coinciden?:\', localStorage.getItem(\'userName\') === event.creator.userName);
+        console.log("👨‍💼 Creador del evento:", event.creator);
+        console.log("🔗 Comparación:");
+        console.log("  - Usuario actual:", localStorage.getItem("userName"));
+        console.log("  - Creador evento:", event.creator.userName);
+        console.log(
+          "  - ¿Coinciden?:",
+          localStorage.getItem("userName") === event.creator.userName
+        );
       }
-      
-      console.log(\'🔐 ¿Sesión activa?:\', EventCreatorUtils.hasActiveSession());
-      console.log(\'✅ ¿Es creador?:\', isCreator);
-      console.log(\'🎯 ¿Mostrar componente?:\', isCreator && EventCreatorUtils.hasActiveSession());
+
+      console.log("🔐 ¿Sesión activa?:", EventCreatorUtils.hasActiveSession());
+      console.log("✅ ¿Es creador?:", isCreator);
+      console.log(
+        "🎯 ¿Mostrar componente?:",
+        isCreator && EventCreatorUtils.hasActiveSession()
+      );
       console.groupEnd();
     }
   }, [event, isCreator]);
-  */
+
+  // Componente de debug temporal
+  const DebugInfo = () => (
+    <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
+      <strong>🔍 Debug Info (REMOVER EN PRODUCCIÓN):</strong>
+      <ul className="mt-2 text-sm">
+        <li>
+          <strong>Usuario actual:</strong>{" "}
+          {localStorage.getItem("userName") || "No encontrado"}
+        </li>
+        <li>
+          <strong>Creador evento:</strong>{" "}
+          {event?.creator?.userName || "No encontrado"}
+        </li>
+        <li>
+          <strong>¿Es creador?:</strong> {isCreator ? "Sí" : "No"}
+        </li>
+        <li>
+          <strong>¿Sesión activa?:</strong>{" "}
+          {EventCreatorUtils.hasActiveSession() ? "Sí" : "No"}
+        </li>
+        <li>
+          <strong>¿Mostrar invitaciones?:</strong>{" "}
+          {isCreator && EventCreatorUtils.hasActiveSession() ? "Sí" : "No"}
+        </li>
+      </ul>
+      <button
+        onClick={() => EventCreatorUtils.debugValidation(event)}
+        className="mt-2 bg-yellow-500 text-white px-3 py-1 rounded text-xs"
+      >
+        Ejecutar Debug Completo
+      </button>
+    </div>
+  );
 
   // Función para inscripción a eventos
-  const registerForEvent = async (eventoId, tipoInscripcion = "evento_principal") => {
-    try {
-      const token = localStorage.getItem("token");
+  const registerForEvent = async (
+  eventoId,
+  tipoInscripcion = "evento_principal"
+) => {
+  try {
+    const token = localStorage.getItem("token");
+    console.log("Token en localStorage al intentar inscribirse:", token); // <-- Añade esta línea
 
-      if (!token) {
-        showToast("No hay sesión activa. Inicia sesión para inscribirte.", "error");
-        throw new Error("No hay token de autenticación");
-      }
+    if (!token) {
+      showToast(
+        "No hay sesión activa. Inicia sesión para inscribirte.",
+        "error"
+      );
+      throw new Error("No hay token de autenticación");
+    }
+    // ... el resto del código
+
 
       const response = await axios.post(
         "https://backendeventhub.onrender.com/api/inscriptions/register",
@@ -357,14 +413,17 @@ const EventDetail = () => {
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
       console.log("Inscripción exitosa:", response.data);
-      showToast(response.data.message || "Te has inscrito exitosamente al evento", "success");
+      showToast(
+        response.data.message || "Te has inscrito exitosamente al evento",
+        "success"
+      );
 
       return {
         success: true,
@@ -379,28 +438,7 @@ const EventDetail = () => {
       if (error.response) {
         errorMessage = error.response.data?.message || "Error al inscribirse";
 
-        switch (error.response.status) {
-          case 400:
-            errorMessage = error.response.data?.message || "Datos de inscripción inválidos";
-            break;
-          case 401:
-            errorMessage = "Sesión expirada. Inicia sesión nuevamente";
-            break;
-          case 403:
-            errorMessage = "No tienes permisos para inscribirte a este evento";
-            break;
-          case 404:
-            errorMessage = "El evento no existe";
-            break;
-          case 409:
-            errorMessage = "Ya estás inscrito en este evento";
-            break;
-          case 500:
-            errorMessage = "Error interno del servidor";
-            break;
-          default:
-            errorMessage = error.response.data?.message || "Error al inscribirse";
-        }
+       
       } else if (error.request) {
         errorMessage = "Error de conexión. Verifica tu internet";
       }
@@ -424,206 +462,390 @@ const EventDetail = () => {
 
     if (processedEvent.categoria && processedEvent.categoria.nombreCategoria) {
       processedEvent.categories = [processedEvent.categoria.nombreCategoria];
+    } else {
+      processedEvent.categories = [];
     }
 
-    // Asegurar que mainImages y galleryImages sean arrays
-    processedEvent.mainImages = Array.isArray(processedEvent.mainImages)
-      ? processedEvent.mainImages
-      : [];
-    processedEvent.galleryImages = Array.isArray(processedEvent.galleryImages)
-      ? processedEvent.galleryImages
-      : [];
+    if (processedEvent.currentAttendees !== undefined) {
+      processedEvent.occupiedTickets = processedEvent.currentAttendees;
+    }
 
-    // Si no hay mainImages, usar una imagen por defecto
-    if (processedEvent.mainImages.length === 0) {
-      processedEvent.mainImages.push({
-        url: "https://placehold.co/1200x600?text=Imagen+Principal+No+Disponible",
-      });
+    if (processedEvent.privacy === "public") {
+      processedEvent.privacy = "Público";
+    } else if (processedEvent.privacy === "private") {
+      processedEvent.privacy = "Privado";
     }
 
     return processedEvent;
   };
 
-  const formatDateTime = (dateString) => {
-    if (!dateString) return "Fecha/Hora no disponible";
-    const options = {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    };
-    return new Date(dateString).toLocaleDateString("es-ES", options);
+  const formatDate = (dateString) => {
+    if (!dateString) return "No especificada";
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date)) return "Fecha inválida";
+      return date.toLocaleDateString("es-ES", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (e) {
+      return "Fecha inválida";
+    }
+  };
+
+  const getDisplayPrice = (event) => {
+    if (!event) return "Gratuito";
+
+    if (
+      (event.ticketType === "Pago" || event.ticketType === "paid") &&
+      event.price &&
+      typeof event.price.amount === "number" &&
+      event.price.amount > 0
+    ) {
+      try {
+        return Number(event.price.amount).toLocaleString("es-CO", {
+          style: "currency",
+          currency: event.price.currency || "COP",
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 2,
+        });
+      } catch (e) {
+        console.error("Error formateando precio:", e);
+        return `COP ${event.price.amount} (Error formato)`;
+      }
+    }
+    return "Gratuito";
+  };
+
+  const calculateRemainingTickets = (event) => {
+    if (!event) return null;
+
+    if (
+      event.maxAttendees == null ||
+      typeof event.maxAttendees !== "number" ||
+      event.maxAttendees <= 0
+    ) {
+      return null;
+    }
+
+    const occupied =
+      typeof event.occupiedTickets === "number"
+        ? event.occupiedTickets
+        : typeof event.currentAttendees === "number"
+        ? event.currentAttendees
+        : 0;
+
+    const remaining = event.maxAttendees - occupied;
+    return remaining >= 0 ? remaining : 0;
+  };
+
+  // Callback para cuando se envía una invitación
+  const handleInvitationSent = (invitationData) => {
+    console.log("Invitación enviada:", invitationData);
   };
 
   if (isLoading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p className="loading-text">Cargando detalles del evento...</p>
+      <div className="flex flex-col items-center justify-center min-h-96">
+        <div className="border-4 border-blue-200 rounded-full border-t-blue-500 w-12 h-12 animate-spin mb-6"></div>
+        <p className="text-gray-600">Cargando evento...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="error-container">
-        <span className="material-symbols-outlined">error</span>
-        <p>Error al cargar el evento: {error}</p>
-        <p>Por favor, intenta de nuevo más tarde.</p>
+      <div className="flex items-center justify-center min-h-96 text-red-500 font-medium text-lg">
+        {error}
       </div>
     );
   }
 
   if (!event) {
     return (
-      <div className="no-event-found">
-        <span className="material-symbols-outlined">sentiment_dissatisfied</span>
-        <h2>Evento no encontrado</h2>
-        <p>El evento que buscas no existe o ha sido eliminado.</p>
+      <div className="flex items-center justify-center min-h-96 text-red-500 font-medium text-lg">
+        Evento no encontrado
       </div>
     );
   }
 
-  const allMediaForLightbox = [
-    ...event.mainImages.map((img) => ({ src: img.url, type: "image" })),
-    ...event.galleryImages.map((img) => ({ src: img.url, type: "image" })),
+  const mainMediaUrls = event.mainImages
+    ? event.mainImages.map((img) => img.url)
+    : [];
+  const galleryMediaUrls = event.galleryImages
+    ? event.galleryImages.map((img) => img.url)
+    : [];
+  const allMedia = [
+    ...mainMediaUrls.map((src) => ({ src, type: "image" })),
+    ...galleryMediaUrls.map((src) => ({ src, type: "image" })),
   ];
 
-  return (
-    <div className="event-detail-page">
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+  const backgroundImage =
+    mainMediaUrls.length > 0
+      ? mainMediaUrls[0]
+      : "https://placehold.co/1200x400?text=Evento";
 
-      {/* Sección de imagen principal y título */}
+  return (
+    <div className="font-sans bg-gray-50 min-h-screen">
+      {/* Toast */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
+      {/* Event Header */}
       <div
-        className="main-image-section"
-        style={{ backgroundImage: `url(${event.mainImages[0]?.url || "https://placehold.co/1200x600?text=Imagen+Principal+No+Disponible"})` }}
+        className="relative h-96 mb-8 w-full mx-auto bg-cover bg-center bg-no-repeat overflow-hidden rounded-2xl"
+        style={{ backgroundImage: `url(${backgroundImage})` }}
       >
-        <div className="overlay"></div>
-        <div className="event-header-content">
-          <h1 className="event-title">{event.title || event.eventName}</h1>
-          <p className="event-subtitle">{event.tagline || "Descubre un evento increíble"}</p>
-          <div className="event-meta-badges">
-            {event.categories && event.categories.length > 0 && (
-              <CategoryTags categories={event.categories} />
-            )}
-            <span className="event-badge">
-                <i className="fas fa-ticket-alt"></i>{" "}
-                {event.ticketType || "Gratuito"}
+        {/* Overlay gradientes */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/10 via-black/20 to-black/60 z-10"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-3/5 bg-gradient-to-t from-black/90 via-black/70 to-transparent z-20"></div>
+
+        <div className="w-full max-w-6xl mx-auto px-6 h-full flex items-end relative z-30">
+          <div className="pb-10 w-full">
+            {/* Event Badges */}
+            <div className="flex items-center gap-3 mb-4 flex-wrap">
+              <span className="bg-white/15 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center transition-all duration-300 hover:bg-white/25 hover:-translate-y-0.5">
+                <i className="fas fa-calendar mr-2"></i>
+                {event.type || "Evento"}
               </span>
+              <span className="bg-white/15 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center transition-all duration-300 hover:bg-white/25 hover:-translate-y-0.5">
+                <i className="fas fa-users mr-2"></i>
+                {event.privacy || "Público"}
+              </span>
+            </div>
+
+            {/* Event Title */}
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight max-w-[90%] text-white">
+              {event.title}
+            </h1>
+
+            {/* Event Meta */}
+            <div className="flex flex-wrap items-center gap-6 mt-4 text-white/95 text-base">
+              <div className="flex items-center bg-black/30 px-3 py-2 rounded-full backdrop-blur-sm">
+                <i className="fas fa-calendar-alt text-blue-400 mr-2"></i>
+                {formatDate(event.start)}
+              </div>
+              <div className="flex items-center bg-black/30 px-3 py-2 rounded-full backdrop-blur-sm">
+                <i className="fas fa-map-marker-alt text-blue-400 mr-2"></i>
+                {event.location?.address || "Ubicación no especificada"}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="event-content-wrapper">
-        <div className="event-main-content">
-          {/* Sección de descripción */}
-          <div className="event-description-card">
-            <h2 className="section-title">
-              <span className="material-symbols-outlined">description</span>
-              Descripción del Evento
-            </h2>
-            <p className="event-description-text">{event.description}</p>
-          </div>
+      {/* Main Container */}
+      <div className="w-full mx-auto px-6 box-border">
+        <div className="flex flex-col gap-8 w-full mx-auto mb-4">
+          {/* Componente de Debug - REMOVER EN PRODUCCIÓN */}
+          {event && <DebugInfo />}
 
-          {/* Sección de detalles */}
-          <div className="event-details-card">
-            <h2 className="section-title">
-              <span className="material-symbols-outlined">info</span>
-              Detalles del Evento
-            </h2>
-            <div className="details-grid">
-              <div className="detail-item">
-                <span className="material-symbols-outlined">calendar_today</span>
-                <div>
-                  <p className="detail-label">Fecha de Inicio</p>
-                  <p className="detail-value">{formatDateTime(event.start)}</p>
-                </div>
-              </div>
-              <div className="detail-item">
-                <span className="material-symbols-outlined">event_end</span>
-                <div>
-                  <p className="detail-label">Fecha de Fin</p>
-                  <p className="detail-value">{formatDateTime(event.end)}</p>
-                </div>
-              </div>
-              <div className="detail-item">
-                <span className="material-symbols-outlined">schedule</span>
-                <div>
-                  <p className="detail-label">Hora</p>
-                  <p className="detail-value">{new Date(event.start).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}</p>
-                </div>
-              </div>
-              <div className="detail-item">
-                <span className="material-symbols-outlined">public</span>
-                <div>
-                  <p className="detail-label">Privacidad</p>
-                  <p className="detail-value">{event.privacy}</p>
-                </div>
-              </div>
-              <div className="detail-item">
-                <span className="material-symbols-outlined">person</span>
-                <div>
-                  <p className="detail-label">Organizador</p>
-                  <p className="detail-value">{event.creator?.userName || "N/A"}</p>
-                </div>
-              </div>
-              <div className="detail-item">
-                <span className="material-symbols-outlined">confirmation_number</span>
-                <div>
-                  <p className="detail-label">Tipo de Entrada</p>
-                  <p className="detail-value">{event.ticketType}</p>
-                </div>
-              </div>
-            </div>
-            <button onClick={() => registerForEvent(event.id)} className="register-button">
-              <span className="material-symbols-outlined">how_to_reg</span>
-              Inscribirme
-            </button>
-          </div>
-
-          {/* Sección de SubEventos */}
-          {event.subeventIds && event.subeventIds.length > 0 && (
-            <div className="subevents-section-card">
-              <h2 className="section-title">
-                <span className="material-symbols-outlined">event_note</span>
-                Actividades del Evento
-              </h2>
-              <SubEventsComponent eventId={event.id} />
-            </div>
+          {/* Componente de Invitaciones - Solo visible para el creador */}
+          {isCreator && EventCreatorUtils.hasActiveSession() && (
+            <InvitationComponent
+              eventId={event.id}
+              onInvitationSent={handleInvitationSent}
+              showToast={showToast}
+            />
           )}
 
-          {/* Sección de Galería de Medios */}
+          {/* Componente de invitaciones forzado para testing - REMOVER EN PRODUCCIÓN */}
+          {event &&
+            localStorage.getItem("userName") === event.creator?.userName && (
+              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                <strong>
+                  ✅ Componente forzado para testing (REMOVER EN PRODUCCIÓN):
+                </strong>
+                <InvitationComponent
+                  eventId={event.id}
+                  onInvitationSent={handleInvitationSent}
+                  showToast={showToast}
+                />
+              </div>
+            )}
+
+          {/* Description Card */}
+          <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-50 w-full box-border mb-8">
+            <h2 className="text-2xl font-semibold mb-6 text-gray-800 relative pb-2">
+              Descripción
+              <span className="absolute bottom-0 left-0 w-12 h-0.5 bg-gradient-to-r from-blue-500 to-blue-400 rounded-full"></span>
+            </h2>
+            <p className="text-gray-600 leading-relaxed text-base">
+              {event.description ||
+                "No hay descripción disponible para este evento."}
+            </p>
+
+            {/* Categories */}
+            {event.categories && event.categories.length > 0 && (
+              <div className="mt-8 pt-6 border-t border-gray-50">
+                <h3 className="text-lg font-medium mb-4 text-gray-700">
+                  Categorías
+                </h3>
+                <CategoryTags categories={event.categories} />
+              </div>
+            )}
+          </div>
+
+          {/* Media Gallery */}
           <MediaGallery
             mainImages={event.mainImages}
             galleryImages={event.galleryImages}
             onMediaClick={openLightbox}
           />
 
-          {/* Sección de Ubicación (Mapa) */}
+          {/* Event Map */}
           <EventMap position={event.location} />
-        </div>
 
-        <div className="event-sidebar-content">
-          {isCreator && EventCreatorUtils.hasActiveSession() && (
-            <InvitationComponent eventId={event.id} showToast={showToast} />
+          {/* Ticket Information */}
+          <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-50 w-full box-border mb-8">
+            <h2 className="text-2xl font-semibold mb-6 text-gray-800 relative pb-2">
+              Información del Evento
+              <span className="absolute bottom-0 left-0 w-12 h-0.5 bg-gradient-to-r from-blue-500 to-blue-400 rounded-full"></span>
+            </h2>
+
+            <div className="flex flex-col w-full gap-2">
+              <div className="flex justify-between items-center p-4 rounded-lg bg-slate-50 border border-gray-50">
+                <span className="text-gray-500 font-medium">Precio</span>
+                <span className="text-2xl font-bold text-emerald-600">
+                  {getDisplayPrice(event)}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center p-4 rounded-lg bg-slate-50 border border-gray-50">
+                <span className="text-gray-500 font-medium">
+                  Fecha de inicio
+                </span>
+                <span className="font-semibold text-gray-800">
+                  {formatDate(event.start)}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center p-4 rounded-lg bg-slate-50 border border-gray-50">
+                <span className="text-gray-500 font-medium">Fecha de fin</span>
+                <span className="font-semibold text-gray-800">
+                  {formatDate(event.end)}
+                </span>
+              </div>
+
+              {calculateRemainingTickets(event) !== null && (
+                <div className="flex justify-between items-center p-4 rounded-lg bg-slate-50 border border-gray-50">
+                  <span className="text-gray-500 font-medium">
+                    Cupos disponibles
+                  </span>
+                  <span className="font-semibold text-gray-800">
+                    {calculateRemainingTickets(event)}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => registerForEvent(event.id)}
+              className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold text-lg text-center border-0 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:from-blue-600 hover:to-blue-700 shadow-md mt-6"
+            >
+              Inscribirse al Evento
+            </button>
+          </div>
+
+          {/* Organizer Information */}
+          {event.creator && (
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-50 w-full box-border mb-8">
+              <h2 className="text-2xl font-semibold mb-6 text-gray-800 relative pb-2">
+                Organizador
+                <span className="absolute bottom-0 left-0 w-12 h-0.5 bg-gradient-to-r from-blue-500 to-blue-400 rounded-full"></span>
+              </h2>
+
+              <div className="flex items-center mb-6 p-4 bg-gradient-to-r from-slate-50 to-gray-100 rounded-xl">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-100 to-blue-200 flex items-center justify-center text-blue-500 text-2xl shadow-md">
+                  <i className="fas fa-user"></i>
+                </div>
+                <div className="ml-6">
+                  <h3 className="font-semibold text-xl text-gray-800">
+                    {event.creator.userName ||
+                      event.creator.name ||
+                      "Organizador"}
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Organizador del evento
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                {event.creator.email && (
+                  <div className="flex items-start p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                    <i className="fas fa-envelope text-blue-500 mt-1 mr-4"></i>
+                    <div>
+                      <p className="font-medium text-gray-800">Email</p>
+                      <p className="text-gray-600">{event.creator.email}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Sub-events Section */}
+          {event.subeventIds && event.subeventIds.length > 0 && (
+            <div className="mt-12 w-full">
+              <h2 className="text-3xl font-semibold mb-8 text-gray-800 text-center">
+                Sub-eventos
+              </h2>
+              <SubEventsComponent eventId={event.id} />
+
+            </div>
           )}
         </div>
       </div>
 
+      {/* Lightbox */}
       <Lightbox
         open={lightboxOpen}
         close={closeLightbox}
-        slides={allMediaForLightbox}
         index={lightboxIndex}
+        slides={allMedia}
         plugins={[Video]}
       />
+
       <Footer />
+
+      {/* Estilos adicionales para animaciones */}
+      <style jsx>{`
+        @keyframes slide-in {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+
+        .animate-slide-in {
+          animation: slide-in 0.3s ease-out;
+        }
+
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 };
 
 export default withCheckAuth(EventDetail);
-
-
