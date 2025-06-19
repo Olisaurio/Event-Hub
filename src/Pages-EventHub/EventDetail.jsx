@@ -353,38 +353,7 @@ const EventDetail = () => {
   }, [event, isCreator]);
 
   // Componente de debug temporal
-  const DebugInfo = () => (
-    <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
-      <strong>🔍 Debug Info (REMOVER EN PRODUCCIÓN):</strong>
-      <ul className="mt-2 text-sm">
-        <li>
-          <strong>Usuario actual:</strong>{" "}
-          {localStorage.getItem("userName") || "No encontrado"}
-        </li>
-        <li>
-          <strong>Creador evento:</strong>{" "}
-          {event?.creator?.userName || "No encontrado"}
-        </li>
-        <li>
-          <strong>¿Es creador?:</strong> {isCreator ? "Sí" : "No"}
-        </li>
-        <li>
-          <strong>¿Sesión activa?:</strong>{" "}
-          {EventCreatorUtils.hasActiveSession() ? "Sí" : "No"}
-        </li>
-        <li>
-          <strong>¿Mostrar invitaciones?:</strong>{" "}
-          {isCreator && EventCreatorUtils.hasActiveSession() ? "Sí" : "No"}
-        </li>
-      </ul>
-      <button
-        onClick={() => EventCreatorUtils.debugValidation(event)}
-        className="mt-2 bg-yellow-500 text-white px-3 py-1 rounded text-xs"
-      >
-        Ejecutar Debug Completo
-      </button>
-    </div>
-  );
+
 
   // Función para inscripción a eventos
   const registerForEvent = async (
@@ -647,7 +616,6 @@ const EventDetail = () => {
       <div className="w-full mx-auto px-6 box-border">
         <div className="flex flex-col gap-8 w-full mx-auto mb-4">
           {/* Componente de Debug - REMOVER EN PRODUCCIÓN */}
-          {event && <DebugInfo />}
 
           {/* Componente de Invitaciones - Solo visible para el creador */}
           {isCreator && EventCreatorUtils.hasActiveSession() && (
@@ -658,20 +626,7 @@ const EventDetail = () => {
             />
           )}
 
-          {/* Componente de invitaciones forzado para testing - REMOVER EN PRODUCCIÓN */}
-          {event &&
-            localStorage.getItem("userName") === event.creator?.userName && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                <strong>
-                  ✅ Componente forzado para testing (REMOVER EN PRODUCCIÓN):
-                </strong>
-                <InvitationComponent
-                  eventId={event.id}
-                  onInvitationSent={handleInvitationSent}
-                  showToast={showToast}
-                />
-              </div>
-            )}
+
 
           {/* Description Card */}
           <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-50 w-full box-border mb-8">
