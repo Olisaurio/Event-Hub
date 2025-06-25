@@ -354,25 +354,23 @@ const EventDetail = () => {
 
   // Componente de debug temporal
 
-
   // Función para inscripción a eventos
   const registerForEvent = async (
-  eventoId,
-  tipoInscripcion = "evento_principal"
-) => {
-  try {
-    const token = localStorage.getItem("token");
-    console.log("Token en localStorage al intentar inscribirse:", token); // <-- Añade esta línea
+    eventoId,
+    tipoInscripcion = "evento_principal"
+  ) => {
+    try {
+      const token = localStorage.getItem("token");
+      console.log("Token en localStorage al intentar inscribirse:", token); // <-- Añade esta línea
 
-    if (!token) {
-      showToast(
-        "No hay sesión activa. Inicia sesión para inscribirte.",
-        "error"
-      );
-      throw new Error("No hay token de autenticación");
-    }
-    // ... el resto del código
-
+      if (!token) {
+        showToast(
+          "No hay sesión activa. Inicia sesión para inscribirte.",
+          "error"
+        );
+        throw new Error("No hay token de autenticación");
+      }
+      // ... el resto del código
 
       const response = await axios.post(
         "https://backendeventhub.onrender.com/api/inscriptions/register",
@@ -406,8 +404,6 @@ const EventDetail = () => {
 
       if (error.response) {
         errorMessage = error.response.data?.message || "Error al inscribirse";
-
-       
       } else if (error.request) {
         errorMessage = "Error de conexión. Verifica tu internet";
       }
@@ -618,15 +614,16 @@ const EventDetail = () => {
           {/* Componente de Debug - REMOVER EN PRODUCCIÓN */}
 
           {/* Componente de Invitaciones - Solo visible para el creador */}
-          {isCreator && EventCreatorUtils.hasActiveSession() && (
-            <InvitationComponent
-              eventId={event.id}
-              onInvitationSent={handleInvitationSent}
-              showToast={showToast}
-            />
-          )}
-
-
+          {/* Componente de Invitaciones - Solo visible para el creador y si el evento es privado */}
+          {isCreator &&
+            EventCreatorUtils.hasActiveSession() &&
+            event.privacy === "private" && ( // <-- CAMBIO AQUÍ
+              <InvitationComponent
+                eventId={event.id}
+                onInvitationSent={handleInvitationSent}
+                showToast={showToast}
+              />
+            )}
 
           {/* Description Card */}
           <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-50 w-full box-border mb-8">
@@ -756,7 +753,6 @@ const EventDetail = () => {
                 Sub-eventos
               </h2>
               <SubEventsComponent eventId={event.id} />
-
             </div>
           )}
         </div>

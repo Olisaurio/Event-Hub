@@ -43,12 +43,8 @@ function App() {
           <Route path="/create-event" element={<CreateEvent />} />
           {/* Nuevas rutas para las funcionalidades solicitadas */}
           <Route path="/my-events" element={<MyEvents/>} />
-
-          <Route path="/invitations" element={<div>Eventos a los que me invitan</div>} />
           <Route path="/agenda" element={<MyAgenda/>} />
           <Route path="/invitations" element={<MyInvitations />} />
-          <Route path="/agenda" element={<div>Mi agenda</div>} />
-
           <Route path="/assistance" element={<Participate />} />
 
           <Route path="/sub-creator" element={<MyInvitationsSubCreator />} />

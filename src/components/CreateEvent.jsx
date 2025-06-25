@@ -314,6 +314,7 @@ const CreateEvent = () => {
     ticketPrice: "",
     ticketCurrency: "COP", // Default a COP
     capacity: "",
+    privacy: "public",
     subEvents: [],
   });
 
@@ -489,6 +490,10 @@ const CreateEvent = () => {
         if (!formData.capacity || parseInt(formData.capacity) <= 0) {
           newErrors.capacity =
             "La capacidad máxima debe ser un número positivo.";
+        }
+
+        if (!formData.privacy) { // Esto es más una medida de seguridad, ya que los radios siempre tendrán un valor
+          newErrors.privacy = "La privacidad del evento es requerida.";
         }
         
         // Validar sub-eventos si existen
@@ -871,7 +876,7 @@ const CreateEvent = () => {
         start: `${formData.eventStartDate}T${formData.eventStartTime}:00Z`,
         end: `${formData.eventEndDate}T${formData.eventEndTime}:00Z`,
         type: "conferencia", // Ajustar según los tipos disponibles en la API
-        privacy: "public",
+        privacy: formData.privacy,
         ticketType: formData.ticketType === "paid" ? "paid" : "free",
         price: {
           amount:
@@ -1813,6 +1818,46 @@ const CreateEvent = () => {
               />
               {errors.capacity && (
                 <p className="text-red-500 text-sm mt-1">{errors.capacity}</p>
+              )}
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Privacidad del evento *
+              </label>
+              <div className="space-y-2">
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    id="privacyPublic" // ID único para este radio
+                    name="privacy" // El nombre debe coincidir con la clave en formData
+                    value="public"
+                    checked={formData.privacy === "public"}
+                    onChange={handleRadioChange} // Reutilizamos la función existente
+                    className="h-4 w-4 text-blue-600"
+                  />
+                  <label htmlFor="privacyPublic" className="ml-2 text-sm text-gray-700">
+                    Público (visible para todos)
+                  </label>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    id="privacyPrivate" // ID único para este radio
+                    name="privacy" // El nombre debe coincidir con la clave en formData
+                    value="private"
+                    checked={formData.privacy === "private"}
+                    onChange={handleRadioChange} // Reutilizamos la función existente
+                    className="h-4 w-4 text-blue-600"
+                  />
+                  <label htmlFor="privacyPrivate" className="ml-2 text-sm text-gray-700">
+                    Privado (solo visible por invitación)
+                  </label>
+                </div>
+              </div>
+              {errors.privacy && ( // Añadir manejo de errores si lo necesitas
+                <p className="text-red-500 text-sm mt-1">{errors.privacy}</p>
               )}
             </div>
 
