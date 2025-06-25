@@ -1,16 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, ChevronLeft, ChevronRight } from 'react';
+import { Search, ChevronLeft, ChevronRight } from 'react-feather';
+import { useNavigate } from 'react-router-dom';
 import '../Styles/MyAgenda.css';
 
 const MyAgenda = () => {
+    const navigate = useNavigate();
+
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDates, setSelectedDates] = useState([]);
-    const [attendees, setAttendees] = useState([]);
+    const [myRegistrations, setMyRegistrations] = useState([]); 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // Nuevos estados para el modal de eventos del día
+    const [showEventsModal, setShowEventsModal] = useState(false);
+    const [currentDayEvents, setCurrentDayEvents] = useState([]);
+    const [modalDate, setModalDate] = useState('');
+    const [eventsByDay, setEventsByDay] = useState(new Map());
+
+    // Nuevos estados para el tooltip
+    const [showTooltip, setShowTooltip] = useState(false);
+    const [tooltipContent, setTooltipContent] = useState('');
+    const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
     const months = [
         'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -19,91 +33,12 @@ const MyAgenda = () => {
 
     const daysOfWeek = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
-    const fetchAttendees = async () => {
-        try {
-            setLoading(true);
-            
-            const token = localStorage.getItem('token');
-            
-            if (!token) {
-                throw new Error('No hay token de autenticación');
-            }
-            
-            const eventsResponse = await axios.get(
-                'https://backendeventhub.onrender.com/api/events/my-created',
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    timeout: 10000,
-                }
-            );
-            
-            console.log('Eventos obtenidos:', eventsResponse.data);
-            
-            const allAttendees = [];
-            
-            for (const event of eventsResponse.data) {
-                try {
-                    const attendeesResponse = await axios.get(
-                        `https://backendeventhub.onrender.com/api/events/${event.id}/attendees`,
-                        {
-                            headers: {
-                                'Authorization': `Bearer ${token}`,
-                                'Content-Type': 'application/json',
-                            },
-                        }
-                    );
-                    
-                    const eventAttendees = attendeesResponse.data.map(attendee => ({
-                        ...attendee,
-                        event: event
-                    }));
-                    
-                    allAttendees.push(...eventAttendees);
-                } catch (attendeeError) {
-                    console.warn(`No se pudieron obtener attendees para evento ${event.id}:`, attendeeError);
-                }
-            }
-            
-            console.log('Todos los attendees:', allAttendees);
-            
-            const transformedAttendees = allAttendees.map((attendee, index) => ({
-                id: attendee.id || `attendee-${index}`,
-                fullName: attendee.user?.name || attendee.fullName || 'Sin nombre',
-                email: attendee.user?.email || attendee.email || 'Sin email',
-                status: mapApiStatusToLocal(attendee.status),
-                registrationDate: formatRegistrationDate(attendee.createdAt || attendee.registrationDate),
-                eventDate: new Date(attendee.event?.start || attendee.eventDate),
-                eventTitle: attendee.event?.title || attendee.eventTitle || 'Sin título',
-                eventId: attendee.event?.id || attendee.eventId
-            }));
-            
-            setAttendees(transformedAttendees);
-            setError(null);
-            
-        } catch (err) {
-            console.error('Error fetching attendees:', err);
-            
-            if (err.response) {
-                if (err.response.status === 401) {
-                    setError('Sesión expirada. Por favor, inicia sesión nuevamente.');
-                } else if (err.response.status === 404) {
-                    setError('No se encontraron asistentes.');
-                } else {
-                    setError(`Error del servidor: ${err.response.status}`);
-                }
-            } else if (err.request) {
-                setError('Error de conexión. Verifica tu internet.');
-            } else {
-                setError('No se pudieron cargar los asistentes');
-            }
-        } finally {
-            setLoading(false);
-        }
+    // Función para verificar si una fecha está seleccionada
+    const isDateSelected = (day) => {
+        return selectedDates.includes(day);
     };
 
+    // Función para mapear el estado de la API a un formato local legible
     const mapApiStatusToLocal = (apiStatus) => {
         const statusMap = {
             'confirmed': 'Confirmado',
@@ -114,10 +49,23 @@ const MyAgenda = () => {
         return statusMap[apiStatus?.toLowerCase()] || 'Pendiente';
     };
 
+    // Función para mapear el estado local a un formato de API
+    const mapLocalStatusToApi = (localStatus) => {
+        const statusMap = {
+            'Confirmado': 'confirmed',
+            'Pendiente': 'pending',
+            'Cancelado': 'cancelled'
+        };
+        return statusMap[localStatus] || 'pending';
+    };
+
+    // Función para formatear la fecha de registro
     const formatRegistrationDate = (dateString) => {
         if (!dateString) return 'Sin fecha';
         
         const date = new Date(dateString);
+        if (isNaN(date.getTime())) return 'Fecha inválida';
+
         const options = { 
             year: 'numeric', 
             month: 'short', 
@@ -126,7 +74,143 @@ const MyAgenda = () => {
         return date.toLocaleDateString('es-ES', options);
     };
 
-    const handleStatusChange = async (id, newStatus) => {
+    // Función principal para obtener mis inscripciones y los detalles de los eventos
+    const fetchMyRegistrations = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                throw new Error('No hay token de autenticación. Por favor, inicia sesión.');
+            }
+            
+            // Paso 1: Obtener todas mis inscripciones
+            const registrationsResponse = await axios.get(
+                'https://backendeventhub.onrender.com/api/inscriptions/my-registrations',
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                }
+             );
+            
+            console.log('Inscripciones obtenidas:', registrationsResponse.data);
+            
+            const inscriptionsArray = registrationsResponse.data.data; 
+            
+            // Validar que inscriptionsArray sea un array
+            if (!Array.isArray(inscriptionsArray)) {
+                console.error('La respuesta no contiene un array de inscripciones:', inscriptionsArray);
+                setMyRegistrations([]);
+                return;
+            }
+            
+            // Paso 2: Filtrar inscripciones que tengan eventId válido
+            const validInscriptions = inscriptionsArray.filter(inscription => {
+                if (!inscription.eventId) {
+                    console.warn('Inscripción sin eventId encontrada:', inscription);
+                    return false;
+                }
+                return true;
+            });
+
+            console.log('Inscripciones válidas (con eventId):', validInscriptions);
+            
+            // Paso 3: Para cada inscripción válida, obtener los detalles completos del evento
+            const eventDetailsPromises = validInscriptions.map(async (inscription) => {
+                try {
+                    const eventResponse = await axios.get(
+                        `https://backendeventhub.onrender.com/api/events/${inscription.eventId}`,
+                        {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json',
+                            },
+                        }
+                     );
+                    return {
+                        ...inscription,
+                        eventDetails: eventResponse.data
+                    };
+                } catch (eventError) {
+                    console.warn(`No se pudieron obtener detalles para el evento ${inscription.eventId} (inscripción ${inscription.id}):`, eventError);
+                    return null;
+                }
+            });
+
+            const results = await Promise.all(eventDetailsPromises);
+            const validRegisteredEvents = results.filter(item => item !== null);
+
+            console.log('Eventos válidos obtenidos:', validRegisteredEvents);
+
+            // Paso 4: Transformar los datos al formato que el componente necesita
+            const transformedData = validRegisteredEvents.map((item, index) => {
+                const userEmail = localStorage.getItem('userEmail') || 'N/A'; 
+                const userName = localStorage.getItem('userName') || 'Usuario'; 
+
+                // Validar que eventDetails y eventDetails.start existan
+                if (!item.eventDetails || !item.eventDetails.start) {
+                    console.warn('Evento sin fecha de inicio:', item);
+                    return null;
+                }
+
+                return {
+                    id: item.id || `reg-${index}`,
+                    fullName: userName,
+                    email: userEmail,
+                    status: mapApiStatusToLocal(item.status),
+                    registrationDate: formatRegistrationDate(item.createdAt),
+                    eventDate: new Date(item.eventDetails.start),
+                    eventTitle: item.eventDetails.title || 'Sin título',
+                    eventId: item.eventDetails.id
+                };
+            }).filter(item => item !== null); // Filtrar elementos nulos
+            
+            console.log('Mis inscripciones transformadas:', transformedData);
+            setMyRegistrations(transformedData);
+
+            // Paso 5: Construir el mapa de eventos por día para el calendario
+            const eventsMap = new Map();
+            transformedData.forEach(reg => {
+                const dateKey = reg.eventDate.toISOString().split('T')[0];
+                if (!eventsMap.has(dateKey)) {
+                    eventsMap.set(dateKey, []);
+                }
+                eventsMap.get(dateKey).push({
+                    eventTitle: reg.eventTitle,
+                    eventId: reg.eventId,
+                    registrationId: reg.id,
+                    status: reg.status
+                });
+            });
+            setEventsByDay(eventsMap);
+            
+        } catch (err) {
+            console.error('Error al cargar mis inscripciones:', err);
+            
+            if (err.response) {
+                if (err.response.status === 401) {
+                    setError('Sesión expirada. Por favor, inicia sesión nuevamente.');
+                } else if (err.response.status === 404) {
+                    setError('No se encontraron inscripciones para tu usuario.');
+                } else {
+                    setError(`Error del servidor: ${err.response.status} - ${err.response.data?.message || 'Error desconocido'}`);
+                }
+            } else if (err.request) {
+                setError('Error de conexión. Verifica tu conexión a internet.');
+            } else {
+                setError(`Error inesperado: ${err.message}`);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Función para manejar el cambio de estado de una inscripción
+    const handleStatusChange = async (registrationId, newStatus) => {
         try {
             const token = localStorage.getItem('token');
             
@@ -137,7 +221,7 @@ const MyAgenda = () => {
             const apiStatus = mapLocalStatusToApi(newStatus);
             
             await axios.put(
-                `https://backendeventhub.onrender.com/api/attendees/${id}/status`,
+                `https://backendeventhub.onrender.com/api/inscriptions/${registrationId}/status`,
                 { status: apiStatus },
                 {
                     headers: {
@@ -145,64 +229,54 @@ const MyAgenda = () => {
                         'Content-Type': 'application/json',
                     }
                 }
-            );
+             );
 
-            setAttendees(attendees.map(attendee =>
-                attendee.id === id ? { ...attendee, status: newStatus } : attendee
+            setMyRegistrations(prevRegistrations => prevRegistrations.map(reg =>
+                reg.id === registrationId ? { ...reg, status: newStatus } : reg
             ));
 
         } catch (err) {
-            console.error('Error updating attendee status:', err);
-            alert('Error al actualizar el estado del asistente');
+            console.error('Error al actualizar el estado de la inscripción:', err);
+            alert('Error al actualizar el estado de tu inscripción. Por favor, inténtalo de nuevo.');
         }
     };
 
-    const mapLocalStatusToApi = (localStatus) => {
-        const statusMap = {
-            'Confirmado': 'confirmed',
-            'Pendiente': 'pending',
-            'Cancelado': 'cancelled'
-        };
-        return statusMap[localStatus] || 'pending';
-    };
-
+    // Efecto para cargar las inscripciones al montar el componente
     useEffect(() => {
-        fetchAttendees();
+        fetchMyRegistrations();
     }, []);
 
+    // Efecto para actualizar las fechas seleccionadas en el calendario
     useEffect(() => {
         updateSelectedDatesFromEvents();
-    }, [attendees, currentMonth]);
+    }, [myRegistrations, currentMonth]);
 
+    // Función para actualizar las fechas seleccionadas en el calendario
     const updateSelectedDatesFromEvents = () => {
-        const eventDates = [];
+        const eventDaysInMonth = [];
         const currentYear = currentMonth.getFullYear();
         const currentMonthIndex = currentMonth.getMonth();
-        const nextMonthIndex = currentMonthIndex + 1;
 
-        attendees.forEach(attendee => {
-            if (attendee.eventDate) {
-                const eventYear = attendee.eventDate.getFullYear();
-                const eventMonth = attendee.eventDate.getMonth();
-                const eventDay = attendee.eventDate.getDate();
+        myRegistrations.forEach(registration => {
+            if (registration.eventDate) {
+                const eventYear = registration.eventDate.getFullYear();
+                const eventMonth = registration.eventDate.getMonth();
+                const eventDay = registration.eventDate.getDate();
 
                 if (eventYear === currentYear && eventMonth === currentMonthIndex) {
-                    eventDates.push(eventDay);
-                }
-                else if (eventYear === currentYear && eventMonth === nextMonthIndex) {
-                    eventDates.push(eventDay + 100); 
+                    eventDaysInMonth.push(eventDay);
                 }
             }
         });
-
-        setSelectedDates(eventDates);
+        setSelectedDates([...new Set(eventDaysInMonth)].sort((a, b) => a - b));
     };
 
+    // Función para centrar el calendario en el próximo evento
     const setCurrentMonthToNextEvent = () => {
         const now = new Date();
-        const upcomingEvents = attendees
-            .filter(attendee => attendee.eventDate && attendee.eventDate >= now)
-            .sort((a, b) => a.eventDate - b.eventDate);
+        const upcomingEvents = myRegistrations
+            .filter(reg => reg.eventDate && reg.eventDate >= now)
+            .sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime()); // CORREGIDO: era 'reg' ahora es 'a'
 
         if (upcomingEvents.length > 0) {
             const nextEventDate = upcomingEvents[0].eventDate;
@@ -210,12 +284,14 @@ const MyAgenda = () => {
         }
     };
 
+    // Efecto para centrar el calendario en el próximo evento
     useEffect(() => {
-        if (attendees.length > 0) {
+        if (myRegistrations.length > 0) {
             setCurrentMonthToNextEvent();
         }
-    }, [attendees]);
+    }, [myRegistrations]);
 
+    // Función para obtener los días de un mes para el calendario
     const getDaysInMonth = (date) => {
         const year = date.getFullYear();
         const month = date.getMonth();
@@ -225,7 +301,7 @@ const MyAgenda = () => {
         const startingDayOfWeek = firstDay.getDay();
 
         const days = [];
-        const adjustedStartingDay = startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1;
+        const adjustedStartingDay = startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1; 
 
         for (let i = 0; i < adjustedStartingDay; i++) {
             days.push(null);
@@ -238,6 +314,7 @@ const MyAgenda = () => {
         return days;
     };
 
+    // Navegación del calendario
     const handlePrevMonth = () => {
         const newMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1);
         setCurrentMonth(newMonth);
@@ -248,59 +325,171 @@ const MyAgenda = () => {
         setCurrentMonth(newMonth);
     };
 
-    const handleDateClick = (day) => {
-        if (!day) return;
+    // Función para obtener la clase CSS del día del calendario
+    const getEventDayClass = (day, monthOffset = 0) => {
+        if (!day) return '';
+        const checkDate = new Date(
+            currentMonth.getFullYear(),
+            currentMonth.getMonth() + monthOffset,
+            day
+        );
+        const dateKey = checkDate.toISOString().split('T')[0];
+        const eventsOnDay = eventsByDay.get(dateKey);
 
-        const dateKey = currentMonth.getMonth() === new Date().getMonth() ? day : day + 100;
-
-        if (selectedDates.includes(dateKey)) {
-            setSelectedDates(selectedDates.filter(d => d !== dateKey));
+        if (!eventsOnDay || eventsOnDay.length === 0) {
+            return '';
+        } else if (eventsOnDay.length === 1) {
+            return 'has-one-event';
         } else {
-            setSelectedDates([...selectedDates, dateKey]);
+            return 'has-multiple-events';
         }
     };
 
-    const isDateSelected = (day) => {
-        if (!day) return false;
-        const dateKey = currentMonth.getMonth() === new Date().getMonth() ? day : day + 100;
-        return selectedDates.includes(dateKey);
-    };
+    // Función para manejar hover en los días del calendario
+    const handleDayHover = (event, day, monthOffset = 0) => {
+        if (!day) return;
 
-    const hasEvent = (day, monthOffset = 0) => {
-        if (!day) return false;
-        
         const checkDate = new Date(
-            currentMonth.getFullYear(), 
-            currentMonth.getMonth() + monthOffset, 
+            currentMonth.getFullYear(),
+            currentMonth.getMonth() + monthOffset,
             day
         );
-        
-        return attendees.some(attendee => 
-            attendee.eventDate && 
-            attendee.eventDate.getFullYear() === checkDate.getFullYear() &&
-            attendee.eventDate.getMonth() === checkDate.getMonth() &&
-            attendee.eventDate.getDate() === checkDate.getDate()
+        const dateKey = checkDate.toISOString().split('T')[0];
+        const eventsOnDay = eventsByDay.get(dateKey);
+
+        if (eventsOnDay && eventsOnDay.length > 0) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            setTooltipPosition({
+                x: rect.left + rect.width / 2,
+                y: rect.top - 10
+            });
+
+            let tooltipText = '';
+            if (eventsOnDay.length === 1) {
+                tooltipText = `1 evento: ${eventsOnDay[0].eventTitle}`;
+            } else {
+                tooltipText = `${eventsOnDay.length} eventos este día`;
+            }
+            
+            setTooltipContent(tooltipText);
+            setShowTooltip(true);
+        }
+    };
+
+    // Función para ocultar el tooltip
+    const handleDayLeave = () => {
+        setShowTooltip(false);
+    };
+
+    // Manejar clic en una fecha del calendario
+    const handleCalendarDayClick = (day, monthOffset = 0) => {
+        if (!day) return;
+
+        const clickedDate = new Date(
+            currentMonth.getFullYear(),
+            currentMonth.getMonth() + monthOffset,
+            day
+        );
+        const dateKey = clickedDate.toISOString().split('T')[0];
+        const eventsOnClickedDay = eventsByDay.get(dateKey);
+
+        if (eventsOnClickedDay && eventsOnClickedDay.length > 0) {
+            setCurrentDayEvents(eventsOnClickedDay);
+            setModalDate(clickedDate.toLocaleDateString('es-ES', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            }));
+            setShowEventsModal(true);
+        }
+    };
+
+    // Filtrar las inscripciones para la tabla
+    const filteredRegistrations = myRegistrations.filter(reg => {
+        const matchesSearch = reg.eventTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              reg.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              reg.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const matchesStatus = statusFilter === 'all' || reg.status.toLowerCase() === statusFilter.toLowerCase();
+
+        const isDateFiltered = selectedDates.length === 0 || (
+            reg.eventDate && 
+            selectedDates.includes(reg.eventDate.getDate()) &&
+            reg.eventDate.getMonth() === currentMonth.getMonth() &&
+            reg.eventDate.getFullYear() === currentMonth.getFullYear()
+        );
+
+        return matchesSearch && matchesStatus && isDateFiltered;
+    });
+
+    // Componente Modal para mostrar eventos de un día
+    const DayEventsModal = ({ date, events, onClose }) => {
+        return (
+            <div className="modal-overlay">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h2>Eventos para el {date}</h2>
+                        <button className="close-button" onClick={onClose}>&times;</button>
+                    </div>
+                    <div className="modal-body">
+                        {events.length > 0 ? (
+                            <ul>
+                                {events.map((event, index) => (
+                                    <li key={index} className="event-item">
+                                        <p className="event-title">{event.eventTitle}</p>
+                                        <p className="event-status">Estado: {event.status}</p>
+                                        <button 
+                                            className="view-event-button" 
+                                            onClick={() => {
+                                                onClose();
+                                                navigate(`/event/${event.eventId}`);
+                                            }}
+                                        >
+                                            Ver Evento
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p>No hay eventos para este día.</p>
+                        )}
+                    </div>
+                </div>
+            </div>
         );
     };
 
-    const filteredAttendees = attendees.filter(attendee => {
-        const matchesSearch = attendee.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            attendee.email.toLowerCase().includes(searchTerm.toLowerCase());
+    // Componente Tooltip
+    const Tooltip = ({ show, content, position }) => {
+        if (!show) return null;
 
-        if (statusFilter === 'all') return matchesSearch;
-        return matchesSearch && attendee.status.toLowerCase() === statusFilter.toLowerCase();
-    });
+        return (
+            <div 
+                className="calendar-tooltip"
+                style={{
+                    position: 'fixed',
+                    left: position.x,
+                    top: position.y,
+                    transform: 'translateX(-50%) translateY(-100%)',
+                    zIndex: 1000
+                }}
+            >
+                {content}
+            </div>
+        );
+    };
 
-    // Renderizado con estados de loading y error
+    // Renderizado condicional para estados de carga y error
     if (loading) {
         return (
             <div className="my-agenda">
                 <div className="agenda-header">
-                    <h1>Eventos agendados</h1>
+                    <h1>Mi Agenda de Eventos</h1>
                 </div>
                 <div className="loading-container">
                     <div className="loading-spinner"></div>
-                    <p>Cargando asistentes...</p>
+                    <p>Cargando mis inscripciones...</p>
                 </div>
             </div>
         );
@@ -310,13 +499,13 @@ const MyAgenda = () => {
         return (
             <div className="my-agenda">
                 <div className="agenda-header">
-                    <h1>Eventos agendados</h1>
+                    <h1>Mi Agenda de Eventos</h1>
                 </div>
                 <div className="error-container">
                     <div className="error-message">
                         <p>{error}</p>
                         <button 
-                            onClick={fetchAttendees}
+                            onClick={fetchMyRegistrations}
                             className="retry-button"
                         >
                             Reintentar
@@ -330,17 +519,17 @@ const MyAgenda = () => {
     return (
         <div className="my-agenda">
             <div className="agenda-header">
-                <h1>Eventos agendados</h1>
+                <h1>Mi Agenda de Eventos</h1>
             </div>
 
             <div className="filters-section">
-                <h3>Filtrar</h3>
+                <h3>Filtrar mis inscripciones</h3>
 
                 <div className="search-container">
                     <Search className="search-icon" size={16} />
                     <input
                         type="text"
-                        placeholder="Search"
+                        placeholder="Buscar por título de evento, nombre o email"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="search-input"
@@ -375,9 +564,22 @@ const MyAgenda = () => {
                 </div>
 
                 <div className="registration-date-section">
-                    <h4>Fecha de eventos</h4>
+                    <h4>Fechas de mis eventos</h4>
+                    
+                    {/* Leyenda de colores */}
+                    <div className="calendar-legend">
+                        <div className="legend-item">
+                            <span className="legend-color single-event"></span>
+                            <span>1 evento</span>
+                        </div>
+                        <div className="legend-item">
+                            <span className="legend-color multiple-events"></span>
+                            <span>Múltiples eventos</span>
+                        </div>
+                    </div>
 
                     <div className="calendar-container">
+                        {/* Calendario del mes actual */}
                         <div className="calendar">
                             <div className="calendar-header">
                                 <button onClick={handlePrevMonth} className="nav-button">
@@ -404,8 +606,10 @@ const MyAgenda = () => {
                                             key={`day-${index}`}
                                             className={`day ${day ? 'clickable' : 'empty'} ${
                                                 isDateSelected(day) ? 'selected' : ''
-                                            } ${hasEvent(day) ? 'has-event' : ''}`}
-                                            onClick={() => handleDateClick(day)}
+                                            } ${getEventDayClass(day)}`}
+                                            onClick={() => handleCalendarDayClick(day)}
+                                            onMouseEnter={(e) => handleDayHover(e, day)}
+                                            onMouseLeave={handleDayLeave}
                                             disabled={!day}
                                         >
                                             {day}
@@ -415,6 +619,7 @@ const MyAgenda = () => {
                             </div>
                         </div>
 
+                        {/* Calendario del próximo mes */}
                         <div className="calendar">
                             <div className="calendar-header">
                                 <span className="month-year">
@@ -435,17 +640,18 @@ const MyAgenda = () => {
 
                                 <div className="days-grid">
                                     {getDaysInMonth(new Date(
-                                        currentMonth.getMonth() === 11 ? 
-                                        currentMonth.getFullYear() + 1 : 
                                         currentMonth.getFullYear(), 
-                                        (currentMonth.getMonth() + 1) % 12
+                                        currentMonth.getMonth() + 1,
+                                        1
                                     )).map((day, index) => (
                                         <button
                                             key={`day-2-${index}`}
                                             className={`day ${day ? 'clickable' : 'empty'} ${
-                                                isDateSelected(day) ? 'selected' : ''
-                                            } ${hasEvent(day, 1) ? 'has-event' : ''}`}
-                                            onClick={() => handleDateClick(day)}
+                                                getEventDayClass(day, 1)
+                                            }`}
+                                            onClick={() => handleCalendarDayClick(day, 1)}
+                                            onMouseEnter={(e) => handleDayHover(e, day, 1)}
+                                            onMouseLeave={handleDayLeave}
                                             disabled={!day}
                                         >
                                             {day}
@@ -458,31 +664,33 @@ const MyAgenda = () => {
                 </div>
             </div>
 
-            <div className="attendees-table">
+            <div className="registrations-table">
                 <div className="table-header">
-                    <div className="col-name">Nombre completo</div>
-                    <div className="col-email">Email</div>
-                    <div className="col-status">Estado</div>
-                    <div className="col-date">Fecha registrada</div>
+                    <div className="col-event-title">Evento</div>
+                    <div className="col-name">Mi Nombre</div>
+                    <div className="col-email">Mi Email</div>
+                    <div className="col-status">Estado de Inscripción</div>
+                    <div className="col-date">Fecha de Inscripción</div>
                     <div className="col-actions">Acción</div>
                 </div>
 
                 <div className="table-body">
-                    {filteredAttendees.length > 0 ? (
-                        filteredAttendees.map(attendee => (
-                            <div key={attendee.id} className="table-row">
-                                <div className="col-name">{attendee.fullName}</div>
-                                <div className="col-email">{attendee.email}</div>
+                    {filteredRegistrations.length > 0 ? (
+                        filteredRegistrations.map(registration => (
+                            <div key={registration.id} className="table-row">
+                                <div className="col-event-title">{registration.eventTitle}</div>
+                                <div className="col-name">{registration.fullName}</div>
+                                <div className="col-email">{registration.email}</div>
                                 <div className="col-status">
-                                    <span className={`status-badge ${attendee.status.toLowerCase()}`}>
-                                        {attendee.status}
+                                    <span className={`status-badge ${registration.status.toLowerCase().replace(' ', '-')}`}>
+                                        {registration.status}
                                     </span>
                                 </div>
-                                <div className="col-date">{attendee.registrationDate}</div>
+                                <div className="col-date">{registration.registrationDate}</div>
                                 <div className="col-actions">
                                     <select
-                                        value={attendee.status}
-                                        onChange={(e) => handleStatusChange(attendee.id, e.target.value)}
+                                        value={registration.status}
+                                        onChange={(e) => handleStatusChange(registration.id, e.target.value)}
                                         className="status-select"
                                     >
                                         <option value="Confirmado">Confirmado</option>
@@ -494,11 +702,27 @@ const MyAgenda = () => {
                         ))
                     ) : (
                         <div className="no-attendees">
-                            <p>No se encontraron asistentes que coincidan con los filtros.</p>
+                            <p>No se encontraron inscripciones que coincidan con los filtros.</p>
                         </div>
                     )}
                 </div>
             </div>
+
+            {/* Modal de Eventos del Día */}
+            {showEventsModal && (
+                <DayEventsModal 
+                    date={modalDate} 
+                    events={currentDayEvents} 
+                    onClose={() => setShowEventsModal(false)} 
+                />
+            )}
+
+            {/* Tooltip */}
+            <Tooltip 
+                show={showTooltip} 
+                content={tooltipContent} 
+                position={tooltipPosition} 
+            />
         </div>
     );
 };
