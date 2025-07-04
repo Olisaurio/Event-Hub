@@ -1,138 +1,137 @@
-/* Paleta de colores morada en gradiente */
+/* Paleta de colores gris y azul en gradiente */
 :root {
-    --purple-50: #f5f3ff;
-    --purple-100: #ede9fe;
-    --purple-200: #ddd6fe;
-    --purple-300: #c4b5fd;
-    --purple-400: #a78bfa;
-    --purple-500: #8b5cf6;
-    --purple-600: #7c3aed;
-    --purple-700: #6d28d9;
-    --purple-800: #5b21b6;
-    --purple-900: #4c1d95;
-    --purple-950: #2e1065;
+    --primary-50: #f8fafc;
+    --primary-100: #f1f5f9;
+    --primary-200: #e2e8f0;
+    --primary-300: #cbd5e1;
+    --primary-400: #94a3b8;
+    --primary-500: #64748b;
+    --primary-600: #3b82f6;
+    --primary-700: #1d4ed8;
+    --primary-800: #1e40af;
+    --primary-900: #1e3a8a;
+    --primary-950: #172554;
   }
-  
-  /* Estilos para reemplazar las clases primary por purple */
+    /* Estilos para reemplazar las clases primary */
   .bg-primary-50 {
-    background-color: var(--purple-50) !important;
+    background-color: var(--primary-50) !important;
   }
   
   .bg-primary-100 {
-    background-color: var(--purple-100) !important;
+    background-color: var(--primary-100) !important;
   }
   
   .bg-primary-200 {
-    background-color: var(--purple-200) !important;
+    background-color: var(--primary-200) !important;
   }
   
   .bg-primary-300 {
-    background-color: var(--purple-300) !important;
+    background-color: var(--primary-300) !important;
   }
   
   .bg-primary-400 {
-    background-color: var(--purple-400) !important;
+    background-color: var(--primary-400) !important;
   }
   
   .bg-primary-500 {
-    background-color: var(--purple-500) !important;
+    background-color: var(--primary-500) !important;
   }
   
   .bg-primary-600 {
-    background-color: var(--purple-600) !important;
+    background-color: var(--primary-600) !important;
   }
   
   .bg-primary-700 {
-    background-color: var(--purple-700) !important;
+    background-color: var(--primary-700) !important;
   }
   
   .bg-primary-800 {
-    background-color: var(--purple-800) !important;
+    background-color: var(--primary-800) !important;
   }
   
   .bg-primary-900 {
-    background-color: var(--purple-900) !important;
+    background-color: var(--primary-900) !important;
   }
   
   /* Estilos para textos */
   .text-primary-50 {
-    color: var(--purple-50) !important;
+    color: var(--primary-50) !important;
   }
   
   .text-primary-100 {
-    color: var(--purple-100) !important;
+    color: var(--primary-100) !important;
   }
   
   .text-primary-200 {
-    color: var(--purple-200) !important;
+    color: var(--primary-200) !important;
   }
   
   .text-primary-300 {
-    color: var(--purple-300) !important;
+    color: var(--primary-300) !important;
   }
   
   .text-primary-400 {
-    color: var(--purple-400) !important;
+    color: var(--primary-400) !important;
   }
   
   .text-primary-500 {
-    color: var(--purple-500) !important;
+    color: var(--primary-500) !important;
   }
   
   .text-primary-600 {
-    color: var(--purple-600) !important;
+    color: var(--primary-600) !important;
   }
   
   .text-primary-700 {
-    color: var(--purple-700) !important;
+    color: var(--primary-700) !important;
   }
   
   .text-primary-800 {
-    color: var(--purple-800) !important;
+    color: var(--primary-800) !important;
   }
   
   .text-primary-900 {
-    color: var(--purple-900) !important;
+    color: var(--primary-900) !important;
   }
   
   /* Estilos para bordes */
   .border-primary-600 {
-    border-color: var(--purple-600) !important;
+    border-color: var(--primary-600) !important;
   }
   
   /* Estilos para gradientes */
   .bg-gradient-to-br.from-primary-50.to-primary-100 {
-    background: linear-gradient(to bottom right, var(--purple-50), var(--purple-100)) !important;
+    background: linear-gradient(to bottom right, var(--primary-50), var(--primary-100)) !important;
   }
   
   .bg-gradient-to-r.from-primary-500.to-primary-600 {
-    background: linear-gradient(to right, var(--purple-500), var(--purple-600)) !important;
+    background: linear-gradient(to right, var(--primary-500), var(--primary-600)) !important;
   }
   
   .bg-gradient-to-r.from-primary-600.to-primary-700 {
-    background: linear-gradient(to right, var(--purple-600), var(--purple-700)) !important;
+    background: linear-gradient(to right, var(--primary-600), var(--primary-700)) !important;
   }
   
   /* Estilos para hover */
   .hover\:bg-primary-600:hover {
-    background-color: var(--purple-600) !important;
+    background-color: var(--primary-600) !important;
   }
   
   .hover\:bg-primary-700:hover {
-    background-color: var(--purple-700) !important;
+    background-color: var(--primary-700) !important;
   }
   
   .hover\:text-primary-400:hover {
-    color: var(--purple-400) !important;
+    color: var(--primary-400) !important;
   }
   
   .hover\:text-primary-600:hover {
-    color: var(--purple-600) !important;
+    color: var(--primary-600) !important;
   }
   
   /* Estilos para botones */
   .btn-primary {
-    background-color: var(--purple-600);
+    background-color: var(--primary-600);
     color: white;
     padding: 0.5rem 1rem;
     border-radius: 9999px;
@@ -140,13 +139,13 @@
   }
   
   .btn-primary:hover {
-    background-color: var(--purple-700);
+    background-color: var(--primary-700);
     transform: scale(1.05);
   }
   
   /* Animaciones para gradientes */
   .purple-gradient-animation {
-    background: linear-gradient(-45deg, var(--purple-500), var(--purple-600), var(--purple-700), var(--purple-800));
+    background: linear-gradient(-45deg, var(--primary-500), var(--primary-600), var(--primary-700), var(--primary-800));
     background-size: 400% 400%;
     animation: gradient 15s ease infinite;
   }

@@ -249,8 +249,7 @@ if (!token || !token.includes(".")) throw new Error("Token inválido");
 
   return (
     <div id="webcrumbs">
-      <div className="w-full min-h-screen bg-gradient-to-br from-purple-900 via-purple-700 to-pink-600 flex items-center justify-center p-4">
-        <div className="w-full max-w-4xl h-[800px] relative perspective-1000">
+        <div className="w-full min-h-screen bg-gradient-to-br from-gray-900 via-slate-700 to-blue-600 flex items-center justify-center p-4">       <div className="w-full max-w-4xl h-[800px] relative perspective-1000">
           <div className={`relative w-full h-full preserve-3d transition-transform duration-700 ${isRightPanelActive ? 'rotate-y-180' : ''}`}>
             
             {/* Login Side (Front) */}
@@ -270,7 +269,7 @@ if (!token || !token.includes(".")) throw new Error("Token inválido");
                         <label className="block text-white/80 text-sm font-medium mb-2">Nombre de usuario</label>
                         <input 
                           type="text" 
-                          className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300"
+                          className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
                           placeholder="Tu nombre de usuario"
                           value={userName}
                           onChange={(e) => setUserName(e.target.value)}
@@ -282,7 +281,7 @@ if (!token || !token.includes(".")) throw new Error("Token inválido");
                         <label className="block text-white/80 text-sm font-medium mb-2">Contraseña</label>
                         <input 
                           type="password" 
-                          className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300"
+                          className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
                           placeholder="••••••••"
                           value={loginPassword}
                           onChange={(e) => setLoginPassword(e.target.value)}
@@ -294,18 +293,18 @@ if (!token || !token.includes(".")) throw new Error("Token inválido");
                         <label className="flex items-center">
                           <input 
                             type="checkbox" 
-                            className="rounded bg-white/10 border-white/20 text-purple-500 focus:ring-purple-400"
+                            className="rounded bg-white/10 border-white/20 text-blue-500 focus:ring-blue-400"
                             checked={rememberMe}
                             onChange={(e) => setRememberMe(e.target.checked)}
                           />
                           <span className="ml-2 text-white/70 text-sm">Recordarme</span>
                         </label>
-                        <a href="recovery-password" className="text-purple-300 hover:text-purple-200 text-sm transition-colors duration-300">¿Olvidaste tu contraseña?</a>
+                        <a href="recovery-password" className="text-blue-300 hover:text-blue-200 text-sm transition-colors duration-300">¿Olvidaste tu contraseña?</a>
                       </div>
                       
                       <button 
                         type="submit" 
-                        className="w-full py-3 px-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-300 shadow-lg"
+                        className="w-full py-3 px-6 bg-gradient-to-r from-blue-500 to-slate-500 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-slate-600 transform hover:scale-105 transition-all duration-300 shadow-lg"
                       >
                         Iniciar Sesión
                       </button>
@@ -341,7 +340,7 @@ if (!token || !token.includes(".")) throw new Error("Token inválido");
                     <div className="mt-8 text-center">
                       <p className="text-white/70">¿No tienes cuenta?</p>
                       <button 
-                        className="text-purple-300 hover:text-purple-200 font-semibold transition-colors duration-300 mt-1"
+                        className="text-blue-300 hover:text-blue-200 font-semibold transition-colors duration-300 mt-1"
                         onClick={handleRegisterClick}
                       >
                         Regístrate aquí
@@ -351,9 +350,9 @@ if (!token || !token.includes(".")) throw new Error("Token inválido");
                 </div>
                 
                 {/* Right Panel - Welcome */}
-                <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-600/30 to-pink-600/30 backdrop-blur-sm items-center justify-center p-12">
+                <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600/30 to-slate-600/30 backdrop-blur-sm items-center justify-center p-12">
                   <div className="text-center">
-                    <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
+                    <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-blue-400 to-slate-400 rounded-full flex items-center justify-center">
                       <span className="material-symbols-outlined text-6xl text-white">login</span>
                     </div>
                     <h3 className="text-2xl font-bold text-white mb-4">¡Hola de nuevo!</h3>
@@ -367,9 +366,9 @@ if (!token || !token.includes(".")) throw new Error("Token inválido");
             <div className="absolute inset-0 w-full h-full backface-hidden rounded-3xl shadow-2xl overflow-hidden bg-white/10 backdrop-blur-lg border border-white/20 rotate-y-180">
               <div className="flex h-full">
                 {/* Left Panel - Welcome */}
-                <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-pink-600/30 to-purple-600/30 backdrop-blur-sm items-center justify-center p-12">
+                <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-600/30 to-blue-600/30 backdrop-blur-sm items-center justify-center p-12">
                   <div className="text-center">
-                    <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-pink-400 to-purple-400 rounded-full flex items-center justify-center">
+                    <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-slate-400 to-blue-400 rounded-full flex items-center justify-center">
                       <span className="material-symbols-outlined text-6xl text-white">person_add</span>
                     </div>
                     <h3 className="text-2xl font-bold text-white mb-4">¡Únete a nosotros!</h3>
@@ -392,7 +391,7 @@ if (!token || !token.includes(".")) throw new Error("Token inválido");
                         <label className="block text-white/80 text-sm font-medium mb-2">Nombre de usuario</label>
                         <input 
                           type="text" 
-                          className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-all duration-300"
+                          className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
                           placeholder="Tu nombre de usuario"
                           value={fullName}
                           onChange={(e) => setFullName(e.target.value)}
@@ -404,7 +403,7 @@ if (!token || !token.includes(".")) throw new Error("Token inválido");
                         <label className="block text-white/80 text-sm font-medium mb-2">Correo electrónico</label>
                         <input 
                           type="email" 
-                          className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-all duration-300"
+                          className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
                           placeholder="tu@email.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
@@ -416,7 +415,7 @@ if (!token || !token.includes(".")) throw new Error("Token inválido");
                         <label className="block text-white/80 text-sm font-medium mb-2">Contraseña</label>
                         <input 
                           type="password" 
-                          className={`w-full px-4 py-3 rounded-xl bg-white/10 border ${passwordError ? 'border-red-400' : 'border-white/20'} text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-all duration-300`}
+                          className={`w-full px-4 py-3 rounded-xl bg-white/10 border ${passwordError ? 'border-red-400' : 'border-white/20'} text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300`}
                           placeholder="••••••••"
                           value={registerPassword}
                           onChange={(e) => setRegisterPassword(e.target.value)}
@@ -429,7 +428,7 @@ if (!token || !token.includes(".")) throw new Error("Token inválido");
                         <label className="block text-white/80 text-sm font-medium mb-2">Confirmar Contraseña</label>
                         <input 
                           type="password" 
-                          className={`w-full px-4 py-3 rounded-xl bg-white/10 border ${confirmPasswordError ? 'border-red-400' : 'border-white/20'} text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-all duration-300`}
+                          className={`w-full px-4 py-3 rounded-xl bg-white/10 border ${confirmPasswordError ? 'border-red-400' : 'border-white/20'} text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300`}
                           placeholder="••••••••"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
@@ -440,7 +439,7 @@ if (!token || !token.includes(".")) throw new Error("Token inválido");
                       
                       <button 
                         type="submit" 
-                        className="w-full py-3 px-6 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold rounded-xl hover:from-pink-600 hover:to-purple-600 transform hover:scale-105 transition-all duration-300 shadow-lg disabled:opacity-70 disabled:transform-none"
+                        className="w-full py-3 px-6 bg-gradient-to-r from-slate-500 to-blue-500 text-white font-semibold rounded-xl hover:from-slate-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-300 shadow-lg disabled:opacity-70 disabled:transform-none"
                         disabled={!!passwordError || !!confirmPasswordError}
                       >
                         Crear Cuenta
@@ -477,7 +476,7 @@ if (!token || !token.includes(".")) throw new Error("Token inválido");
                     <div className="mt-8 text-center">
                       <p className="text-white/70">Ya tienes cuenta?</p>
                       <button 
-                        className="text-purple-300 hover:text-purple-200 font-semibold transition-colors duration-300 mt-1"
+                        className="text-blue-300 hover:text-blue-200 font-semibold transition-colors duration-300 mt-1"
                         onClick={handleLoginClick}
                       >
                         Inicia sesión aquí

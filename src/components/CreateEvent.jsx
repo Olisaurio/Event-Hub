@@ -7,6 +7,245 @@ import { withCheckAuth } from "../Utils/CheckAuth";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/footer.jsx";
 
+// Componente de notificación flotante
+const FloatingNotification = ({ message, type = 'error', onClose, duration = 5000 }) => {
+  useEffect(() => {
+    if (duration > 0) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, duration);
+      return () => clearTimeout(timer);
+    }
+  }, [duration, onClose]);
+
+  const getTypeStyles = () => {
+    switch (type) {
+      case 'success':
+        return 'bg-green-500 border-green-600';
+      case 'warning':
+        return 'bg-yellow-500 border-yellow-600';
+      case 'info':
+        return 'bg-blue-500 border-blue-600';
+      default:
+        return 'bg-red-500 border-red-600';
+    }
+  };
+
+  const getIcon = () => {
+    switch (type) {
+      case 'success':
+        return '✓';
+      case 'warning':
+        return '⚠';
+      case 'info':
+        return 'ℹ';
+      default:
+        return '✕';
+    }
+  };
+
+  return (
+    <div className={`fixed top-4 right-4 z-50 max-w-sm w-full ${getTypeStyles()} text-white p-4 rounded-lg shadow-lg border-l-4 transform transition-all duration-300 ease-in-out`}>
+      <div className="flex items-start">
+        <div className="flex-shrink-0">
+          <span className="text-lg font-bold">{getIcon()}</span>
+        </div>
+        <div className="ml-3 flex-1">
+          <p className="text-sm font-medium">{message}</p>
+        </div>
+        <div className="ml-4 flex-shrink-0">
+          <button
+            onClick={onClose}
+            className="text-white hover:text-gray-200 focus:outline-none"
+          >
+            <span className="sr-only">Cerrar</span>
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Hook para manejar notificaciones
+const useNotifications = () => {
+  const [notifications, setNotifications] = useState([]);
+
+  const addNotification = (message, type = 'error', duration = 5000) => {
+    const id = Date.now() + Math.random(); // Mejorar ID único
+    const notification = { id, message, type, duration };
+    setNotifications(prev => [...prev, notification]);
+  };
+
+  const removeNotification = (id) => {
+    setNotifications(prev => prev.filter(notif => notif.id !== id));
+  };
+
+  const NotificationContainer = () => (
+    <div className="fixed top-4 right-4 z-50 space-y-2">
+      {notifications.map(notification => (
+        <FloatingNotification
+          key={notification.id}
+          message={notification.message}
+          type={notification.type}
+          duration={notification.duration}
+          onClose={() => removeNotification(notification.id)}
+        />
+      ))}
+    </div>
+  );
+
+  return { addNotification, NotificationContainer };
+};
+
+// Funciones de validación mejoradas
+const validateTime = (time) => {
+  if (!time) return { isValid: false, message: "La hora es requerida" };
+  
+  const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+  if (!timeRegex.test(time)) {
+    return { isValid: false, message: "Formato de hora inválido (HH:MM)" };
+  }
+  
+  const [hours, minutes] = time.split(':').map(Number);
+  if (hours < 0 || hours > 23) {
+    return { isValid: false, message: "Las horas deben estar entre 00 y 23" };
+  }
+  if (minutes < 0 || minutes > 59) {
+    return { isValid: false, message: "Los minutos deben estar entre 00 y 59" };
+  }
+  
+  return { isValid: true, message: "" };
+};
+
+const validatePhoneNumber = (phone) => {
+  if (!phone) return { isValid: true, message: "" }; // Teléfono es opcional
+  
+  // Remover espacios y caracteres especiales para validación
+  const cleanPhone = phone.replace(/[\s\-\(\)\+]/g, '');
+  
+  // Validar que solo contenga números
+  if (!/^\d+$/.test(cleanPhone)) {
+    return { isValid: false, message: "El teléfono solo debe contener números" };
+  }
+  
+  // Validar longitud (entre 7 y 15 dígitos según estándares internacionales)
+  if (cleanPhone.length < 7) {
+    return { isValid: false, message: "El teléfono debe tener al menos 7 dígitos" };
+  }
+  if (cleanPhone.length > 15) {
+    return { isValid: false, message: "El teléfono no puede tener más de 15 dígitos" };
+  }
+  
+  // Validar formato colombiano si empieza con 57 o +57
+  if (cleanPhone.startsWith('57') && cleanPhone.length === 12) {
+    const localNumber = cleanPhone.substring(2);
+    if (!localNumber.startsWith('3') && !localNumber.startsWith('1')) {
+      return { isValid: false, message: "Número colombiano inválido" };
+    }
+  }
+  
+  // Validar formato local colombiano (10 dígitos empezando con 3 para móvil)
+  if (cleanPhone.length === 10 && cleanPhone.startsWith('3')) {
+    return { isValid: true, message: "" };
+  }
+  
+  // Validar formato local colombiano (7 dígitos para fijo)
+  if (cleanPhone.length === 7) {
+    return { isValid: true, message: "" };
+  }
+  
+  // Para otros formatos internacionales válidos
+  if (cleanPhone.length >= 8 && cleanPhone.length <= 15) {
+    return { isValid: true, message: "" };
+  }
+  
+  return { isValid: false, message: "Formato de teléfono inválido" };
+};
+
+const formatPhoneNumber = (phone) => {
+  if (!phone) return "";
+  
+  const cleanPhone = phone.replace(/[\s\-\(\)\+]/g, '');
+  
+  // Formato para números colombianos de 10 dígitos
+  if (cleanPhone.length === 10 && cleanPhone.startsWith('3')) {
+    return `${cleanPhone.substring(0, 3)} ${cleanPhone.substring(3, 6)} ${cleanPhone.substring(6)}`;
+  }
+  
+  // Formato para números de 7 dígitos (fijo)
+  if (cleanPhone.length === 7) {
+    return `${cleanPhone.substring(0, 3)} ${cleanPhone.substring(3)}`;
+  }
+  
+  // Para otros formatos, devolver como está
+  return phone;
+};
+
+const validateTimeRange = (startTime, endTime, startDate, endDate) => {
+  if (!startTime || !endTime || !startDate || !endDate) {
+    return { isValid: true, message: "" }; // Se valida individualmente
+  }
+  
+  const startDateTime = new Date(`${startDate}T${startTime}`);
+  const endDateTime = new Date(`${endDate}T${endTime}`);
+  
+  if (endDateTime <= startDateTime) {
+    return { isValid: false, message: "La hora de fin debe ser posterior a la hora de inicio" };
+  }
+  
+  // Validar que el evento no sea demasiado corto (mínimo 30 minutos)
+  const diffMinutes = (endDateTime - startDateTime) / (1000 * 60);
+  if (diffMinutes < 30) {
+    return { isValid: false, message: "El evento debe durar al menos 30 minutos" };
+  }
+  
+  // Validar que el evento no sea demasiado largo (máximo 7 días)
+  const diffDays = diffMinutes / (60 * 24);
+  if (diffDays > 30) {
+    return { isValid: false, message: "El evento no puede durar más de 30 días" };
+  }
+  
+  return { isValid: true, message: "" };
+};
+
+// Función para validar que la fecha no sea en el pasado
+const validateFutureDate = (date, time = "00:00") => {
+  if (!date) return { isValid: false, message: "La fecha es requerida" };
+  
+  const selectedDateTime = new Date(`${date}T${time}`);
+  const now = new Date();
+  
+  if (selectedDateTime < now) {
+    return { isValid: false, message: "La fecha no puede ser en el pasado" };
+  }
+  
+  return { isValid: true, message: "" };
+};
+
+// Función para validar capacidad con límites más específicos
+const validateCapacity = (capacity) => {
+  if (!capacity) return { isValid: false, message: "La capacidad es requerida" };
+  
+  const numCapacity = parseInt(capacity);
+  
+  if (isNaN(numCapacity) || numCapacity <= 0) {
+    return { isValid: false, message: "La capacidad debe ser un número positivo" };
+  }
+  
+  if (numCapacity > 100000) {
+    return { isValid: false, message: "La capacidad no puede exceder 100,000 personas" };
+  }
+  
+  if (numCapacity < 1) {
+    return { isValid: false, message: "La capacidad mínima es 1 persona" };
+  }
+  
+  return { isValid: true, message: "" };
+};
+
 // Solución al problema de iconos en Leaflet con React
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -230,6 +469,7 @@ const processAndStoreFile = (
 
 const CreateEvent = () => {
   const navigate = useNavigate();
+  const { addNotification, NotificationContainer } = useNotifications();
   
   // Estados para controlar el paso actual y la barra de progreso
   const [currentStep, setCurrentStep] = useState(1);
@@ -245,7 +485,7 @@ const CreateEvent = () => {
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
   // Consumo api categories
-  useEffect(() => {
+useEffect(() => {
     const fetchCategories = async () => {
       setIsLoadingCategories(true);
       try {
@@ -268,6 +508,8 @@ const CreateEvent = () => {
         // Filtrar solo categorías activas
         const activeCategories = categoriesData.filter((cat) => cat.activa);
         setCategories(activeCategories);
+        console.log(activeCategories + " active categories");
+        
       } catch (err) {
         console.error("Error fetching categories:", err);
         setCategories([]);
@@ -276,7 +518,7 @@ const CreateEvent = () => {
       }
     };
 
-    fetchCategories();
+  fetchCategories();
   }, []);
 
   // Estados para los datos del formulario
@@ -375,10 +617,12 @@ const CreateEvent = () => {
     if (validateCurrentStep()) {
       if (currentStep < 7) {
         setCurrentStep(currentStep + 1);
+        addNotification(`Paso ${currentStep + 1} completado`, "success", 2000);
       }
     } else {
-      alert(
-        "Por favor, complete todos los campos obligatorios marcados con * y corrija los errores antes de continuar."
+      addNotification(
+        "Por favor, complete todos los campos obligatorios marcados con * y corrija los errores antes de continuar.",
+        "warning"
       );
     }
   };
@@ -406,6 +650,8 @@ const CreateEvent = () => {
         longitude: undefined,
       }));
     }
+
+    addNotification("Ubicación seleccionada en el mapa", "info", 2000);
   };
 
   // Función para validar el paso actual
@@ -447,6 +693,34 @@ const CreateEvent = () => {
         if (!formData.eventEndTime)
           newErrors.eventEndTime = "La hora de fin es requerida.";
 
+        // Validaciones mejoradas de tiempo
+        const startTimeValidation = validateTime(formData.eventStartTime);
+        if (!startTimeValidation.isValid) {
+          newErrors.eventStartTime = startTimeValidation.message;
+        }
+
+        const endTimeValidation = validateTime(formData.eventEndTime);
+        if (!endTimeValidation.isValid) {
+          newErrors.eventEndTime = endTimeValidation.message;
+        }
+
+        // Validar fechas futuras
+        const startDateValidation = validateFutureDate(formData.eventStartDate, formData.eventStartTime);
+        if (!startDateValidation.isValid) {
+          newErrors.eventStartDate = startDateValidation.message;
+        }
+
+        // Validar rango de tiempo
+        const timeRangeValidation = validateTimeRange(
+          formData.eventStartTime,
+          formData.eventEndTime,
+          formData.eventStartDate,
+          formData.eventEndDate
+        );
+        if (!timeRangeValidation.isValid) {
+          newErrors.timeRange = timeRangeValidation.message;
+        }
+
         // Validar que la fecha de fin no sea anterior a la de inicio
         if (formData.eventStartDate && formData.eventEndDate) {
           const startDateTime = new Date(
@@ -476,6 +750,12 @@ const CreateEvent = () => {
         ) {
           newErrors.contactEmail = "Ingrese un email válido.";
         }
+
+        // Validación mejorada de teléfono
+        const phoneValidation = validatePhoneNumber(formData.contactPhone);
+        if (!phoneValidation.isValid) {
+          newErrors.contactPhone = phoneValidation.message;
+        }
         break;
 
       case 6: // Entradas y capacidad
@@ -487,9 +767,10 @@ const CreateEvent = () => {
             "El precio debe ser mayor a cero para eventos de pago.";
         }
 
-        if (!formData.capacity || parseInt(formData.capacity) <= 0) {
-          newErrors.capacity =
-            "La capacidad máxima debe ser un número positivo.";
+        // Validación mejorada de capacidad
+        const capacityValidation = validateCapacity(formData.capacity);
+        if (!capacityValidation.isValid) {
+          newErrors.capacity = capacityValidation.message;
         }
 
         if (!formData.privacy) { // Esto es más una medida de seguridad, ya que los radios siempre tendrán un valor
@@ -507,6 +788,21 @@ const CreateEvent = () => {
             if (!subEvent.startDate || !subEvent.startTime) {
               newErrors.subEvents = "Todos los sub-eventos deben tener fecha y hora de inicio";
               break;
+            }
+
+            // Validar tiempo de sub-eventos
+            const subStartTimeValidation = validateTime(subEvent.startTime);
+            if (!subStartTimeValidation.isValid) {
+              newErrors.subEvents = `Error en sub-evento "${subEvent.name}": ${subStartTimeValidation.message}`;
+              break;
+            }
+
+            if (subEvent.endTime) {
+              const subEndTimeValidation = validateTime(subEvent.endTime);
+              if (!subEndTimeValidation.isValid) {
+                newErrors.subEvents = `Error en sub-evento "${subEvent.name}": ${subEndTimeValidation.message}`;
+                break;
+              }
             }
             
             // Validar que las fechas del sub-evento estén dentro del rango del evento principal
@@ -564,6 +860,24 @@ const CreateEvent = () => {
           if (!formData.eventStartTime) stepErrors.eventStartTime = "La hora de inicio es requerida.";
           if (!formData.eventEndDate) stepErrors.eventEndDate = "La fecha de fin es requerida.";
           if (!formData.eventEndTime) stepErrors.eventEndTime = "La hora de fin es requerida.";
+
+          // Validaciones mejoradas de tiempo
+          const startTimeValidation = validateTime(formData.eventStartTime);
+          if (!startTimeValidation.isValid) {
+            stepErrors.eventStartTime = startTimeValidation.message;
+          }
+
+          const endTimeValidation = validateTime(formData.eventEndTime);
+          if (!endTimeValidation.isValid) {
+            stepErrors.eventEndTime = endTimeValidation.message;
+          }
+
+          // Validar fechas futuras
+          const startDateValidation = validateFutureDate(formData.eventStartDate, formData.eventStartTime);
+          if (!startDateValidation.isValid) {
+            stepErrors.eventStartDate = startDateValidation.message;
+          }
+
           if (formData.eventStartDate && formData.eventEndDate) {
             const startDateTime = new Date(`${formData.eventStartDate}T${formData.eventStartTime || "00:00"}`);
             const endDateTime = new Date(`${formData.eventEndDate}T${formData.eventEndTime || "00:00"}`);
@@ -574,10 +888,22 @@ const CreateEvent = () => {
           if (!formData.eventOrganizer.trim()) stepErrors.eventOrganizer = "El organizador es requerido.";
           if (!formData.contactEmail.trim()) stepErrors.contactEmail = "El email de contacto es requerido.";
           if (formData.contactEmail && !/\S+@\S+\.\S+/.test(formData.contactEmail)) stepErrors.contactEmail = "Ingrese un email válido.";
+          
+          // Validación mejorada de teléfono
+          const phoneValidation = validatePhoneNumber(formData.contactPhone);
+          if (!phoneValidation.isValid) {
+            stepErrors.contactPhone = phoneValidation.message;
+          }
           break;
         case 6: // Entradas y capacidad
           if (formData.ticketType === "paid" && (!formData.ticketPrice || parseFloat(formData.ticketPrice) <= 0)) stepErrors.ticketPrice = "El precio debe ser mayor a cero para eventos de pago.";
-          if (!formData.capacity || parseInt(formData.capacity) <= 0) stepErrors.capacity = "La capacidad máxima debe ser un número positivo.";
+          
+          // Validación mejorada de capacidad
+          const capacityValidation = validateCapacity(formData.capacity);
+          if (!capacityValidation.isValid) {
+            stepErrors.capacity = capacityValidation.message;
+          }
+          
           // Validar sub-eventos
           if (formData.subEvents && formData.subEvents.length > 0) {
             for (const subEvent of formData.subEvents) {
@@ -587,6 +913,14 @@ const CreateEvent = () => {
               if (!subEvent.startDate || !subEvent.startTime) {
                 stepErrors.subEvents = "Todos los sub-eventos deben tener fecha y hora de inicio"; break;
               }
+
+              // Validar tiempo de sub-eventos
+              const subStartTimeValidation = validateTime(subEvent.startTime);
+              if (!subStartTimeValidation.isValid) {
+                stepErrors.subEvents = `Error en sub-evento "${subEvent.name}": ${subStartTimeValidation.message}`;
+                break;
+              }
+
               if (formData.eventStartDate && formData.eventStartTime && formData.eventEndDate && formData.eventEndTime) {
                 const subEventStart = new Date(`${subEvent.startDate}T${subEvent.startTime}`);
                 const subEventEnd = subEvent.endDate && subEvent.endTime ? new Date(`${subEvent.endDate}T${subEvent.endTime}`) : subEventStart;
@@ -611,13 +945,56 @@ const CreateEvent = () => {
   // Función para manejar cambios en los inputs
   const handleInputChange = (e) => {
     const { id, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
+    
+    // Formateo especial para teléfono
+    if (id === 'contactPhone') {
+      const formattedPhone = formatPhoneNumber(value);
+      setFormData((prev) => ({
+        ...prev,
+        [id]: formattedPhone,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [id]: value,
+      }));
+    }
+    
     // Limpiar error específico cuando el usuario modifica el campo
     if (errors[id]) {
       setErrors((prev) => ({ ...prev, [id]: undefined }));
+    }
+
+    // Validación en tiempo real para campos específicos
+    if (id === 'eventStartTime' || id === 'eventEndTime') {
+      const timeValidation = validateTime(value);
+      if (!timeValidation.isValid && value) {
+        setErrors((prev) => ({ ...prev, [id]: timeValidation.message }));
+      } else if (timeValidation.isValid && value) {
+        // Mostrar notificación de éxito solo si el campo tenía error antes
+        if (errors[id]) {
+          addNotification("Formato de hora correcto", "success", 2000);
+        }
+      }
+    }
+
+    if (id === 'contactPhone') {
+      const phoneValidation = validatePhoneNumber(value);
+      if (!phoneValidation.isValid && value) {
+        setErrors((prev) => ({ ...prev, [id]: phoneValidation.message }));
+      } else if (phoneValidation.isValid && value) {
+        // Mostrar notificación de éxito solo si el campo tenía error antes
+        if (errors[id]) {
+          addNotification("Número de teléfono válido", "success", 2000);
+        }
+      }
+    }
+
+    if (id === 'capacity') {
+      const capacityValidation = validateCapacity(value);
+      if (!capacityValidation.isValid && value) {
+        setErrors((prev) => ({ ...prev, [id]: capacityValidation.message }));
+      }
     }
   };
 
@@ -658,12 +1035,15 @@ const CreateEvent = () => {
         [`mainImage${index}`]: undefined,
         mainImages: undefined,
       }));
+
+      addNotification("Imagen subida correctamente", "success", 3000);
     } catch (errorMsg) {
       setErrors((prev) => ({
         ...prev,
         [`mainImage${index}`]: String(errorMsg),
         mainImages: String(errorMsg),
       }));
+      addNotification(String(errorMsg), "error");
     }
   };
 
@@ -682,6 +1062,8 @@ const CreateEvent = () => {
       newMainImageFiles[index] = null;
       return { ...prev, mainImageFiles: newMainImageFiles };
     });
+
+    addNotification("Imagen eliminada", "info", 2000);
   };
 
   // Función para manejar la subida de múltiples imágenes para la galería
@@ -691,11 +1073,12 @@ const CreateEvent = () => {
 
     // Validar límite de imágenes
     if (formData.galleryImageFiles.length + files.length > 12) {
+      const errorMsg = "No puede subir más de 12 imágenes en total para la galería.";
       setErrors((prev) => ({
         ...prev,
-        galleryImages:
-          "No puede subir más de 12 imágenes en total para la galería.",
+        galleryImages: errorMsg,
       }));
+      addNotification(errorMsg, "error");
       return;
     }
 
@@ -723,10 +1106,14 @@ const CreateEvent = () => {
         ...prev,
         galleryImages: galleryError,
       }));
-    } else if (errors.galleryImages) {
-      // Limpiar error si se subieron imágenes y antes había error de cantidad
-      if (formData.galleryImageFiles.length + newImageFiles.length >= 5) {
-        setErrors((prev) => ({ ...prev, galleryImages: undefined }));
+      addNotification(galleryError, "error");
+    } else {
+      addNotification(`${newImageFiles.length} imagen(es) subida(s) a la galería`, "success", 3000);
+      if (errors.galleryImages) {
+        // Limpiar error si se subieron imágenes y antes había error de cantidad
+        if (formData.galleryImageFiles.length + newImageFiles.length >= 5) {
+          setErrors((prev) => ({ ...prev, galleryImages: undefined }));
+        }
       }
     }
   };
@@ -750,6 +1137,8 @@ const CreateEvent = () => {
       }
       return { ...prev, galleryImageFiles: newGalleryImageFiles };
     });
+
+    addNotification("Imagen eliminada de la galería", "info", 2000);
   };
 
   // Función para manejar la subida de video
@@ -770,11 +1159,14 @@ const CreateEvent = () => {
         ...prev,
         video: undefined,
       }));
+
+      addNotification("Video subido correctamente", "success", 3000);
     } catch (errorMsg) {
       setErrors((prev) => ({
         ...prev,
         video: String(errorMsg),
       }));
+      addNotification(String(errorMsg), "error");
     }
   };
 
@@ -790,6 +1182,8 @@ const CreateEvent = () => {
         eventVideo: null,
       };
     });
+
+    addNotification("Video eliminado", "info", 2000);
   };
 
   // Función para añadir un sub-evento
@@ -808,6 +1202,8 @@ const CreateEvent = () => {
       ...formData,
       subEvents: [...formData.subEvents, newSubEvent],
     });
+
+    addNotification("Sub-evento agregado", "success", 2000);
   };
 
   // Función para eliminar un sub-evento
@@ -816,10 +1212,23 @@ const CreateEvent = () => {
       ...formData,
       subEvents: formData.subEvents.filter((subEvent) => subEvent.id !== id),
     });
+
+    addNotification("Sub-evento eliminado", "info", 2000);
   };
 
   // Función para actualizar un sub-evento
   const updateSubEvent = (id, field, value) => {
+    // Formateo especial para campos de tiempo
+    if (field === 'startTime' || field === 'endTime') {
+      // Validar formato de tiempo en tiempo real
+      if (value) {
+        const timeValidation = validateTime(value);
+        if (!timeValidation.isValid) {
+          addNotification(`Error en tiempo: ${timeValidation.message}`, "error", 3000);
+        }
+      }
+    }
+
     setFormData({
       ...formData,
       subEvents: formData.subEvents.map((subEvent) =>
@@ -835,8 +1244,9 @@ const CreateEvent = () => {
   // Función para enviar el formulario (handleSubmit con integración de sub-eventos)
   const handleSubmit = async () => {
     if (!validateForm()) {
-      alert(
-        "Por favor, revise el formulario. Hay campos obligatorios sin completar o con errores."
+      addNotification(
+        "Por favor, revise el formulario. Hay campos obligatorios sin completar o con errores.",
+        "error"
       );
       // Opcional: llevar al usuario al primer paso con errores
       const firstErrorStep = Object.keys(errors).length > 0 ? 
@@ -844,7 +1254,7 @@ const CreateEvent = () => {
           if (['eventName', 'eventDescription', 'eventCategory', 'eventType'].includes(key)) return 1;
           if (key === 'mainImages') return 2;
           if (key === 'galleryImages' || key === 'video') return 3;
-          if (['eventLocation', 'eventStartDate', 'eventStartTime', 'eventEndDate', 'eventEndTime'].includes(key)) return 4;
+          if (['eventLocation', 'eventStartDate', 'eventStartTime', 'eventEndDate', 'eventEndTime', 'timeRange'].includes(key)) return 4;
           if (['eventOrganizer', 'contactEmail', 'contactPhone'].includes(key)) return 5;
           if (['ticketType', 'ticketPrice', 'capacity', 'subEvents'].includes(key)) return 6;
           return 7;
@@ -858,6 +1268,8 @@ const CreateEvent = () => {
     setSubEventProgress(null); // Resetear progreso de sub-eventos
 
     try {
+      addNotification("Iniciando creación del evento...", "info", 3000);
+
       // Preparar datos para enviar a la API
       const eventData = {
         title: formData.eventName,
@@ -905,6 +1317,8 @@ const CreateEvent = () => {
       };
       console.log("Datos iniciales a enviar:", eventData);
 
+      addNotification("Subiendo imágenes principales...", "info", 3000);
+
       // Subir imágenes principales a Cloudinary
       const mainImagesData = [];
       for (const imgData of formData.mainImageFiles) {
@@ -924,6 +1338,10 @@ const CreateEvent = () => {
         }
       }
       eventData.mainImages = mainImagesData;
+
+      if (formData.galleryImageFiles.length > 0) {
+        addNotification("Subiendo imágenes de galería...", "info", 3000);
+      }
 
       // Subir imágenes de galería a Cloudinary
       const galleryImagesData = [];
@@ -946,6 +1364,7 @@ const CreateEvent = () => {
       // Subir video a Cloudinary si existe
       const videosData = [];
       if (formData.eventVideo) {
+        addNotification("Subiendo video...", "info", 3000);
         try {
           const videoUrl = await uploadToCloudinary(
             formData.eventVideo.file,
@@ -968,6 +1387,8 @@ const CreateEvent = () => {
       console.log("Datos finales a enviar a la API:", eventData);
       
       const token = localStorage.getItem("token");
+
+      addNotification("Creando evento...", "info", 3000);
 
       // Enviar datos a la API
       const response = await fetch(
@@ -998,80 +1419,49 @@ const CreateEvent = () => {
       }
 
       const result = await response.json();
-      console.log("Respuesta exitosa del evento principal:", result);
-      
-      // Obtener el ID del evento principal creado
-      const eventoPrincipalId = result.id;
-      
+      console.log("Evento creado exitosamente:", result);
+
       // Crear sub-eventos si existen
       if (formData.subEvents && formData.subEvents.length > 0) {
-        console.log(`Creando ${formData.subEvents.length} sub-eventos para el evento principal ${eventoPrincipalId}`);
-        
-        // Mostrar indicador de progreso para sub-eventos
-        setSubEventProgress({
-          total: formData.subEvents.length,
-          current: 0,
-          completed: 0,
-          failed: 0
-        });
-        
-        // Array para almacenar resultados de sub-eventos
-        const subEventResults = [];
-        const subEventErrors = [];
-        
-        // Crear cada sub-evento
+        addNotification(`Creando ${formData.subEvents.length} sub-evento(s)...`, "info", 3000);
+        setSubEventProgress({ current: 0, total: formData.subEvents.length });
+
         for (let i = 0; i < formData.subEvents.length; i++) {
           const subEvent = formData.subEvents[i];
-          
-          setSubEventProgress(prev => ({
-            ...prev,
-            current: i + 1
-          }));
-          
+          setSubEventProgress({ current: i + 1, total: formData.subEvents.length });
+
+          const subEventData = {
+            title: subEvent.name,
+            description: subEvent.description || "",
+            location: eventData.location, // Usar la misma ubicación del evento principal
+            start: `${subEvent.startDate}T${subEvent.startTime}:00Z`,
+            end: subEvent.endDate && subEvent.endTime 
+              ? `${subEvent.endDate}T${subEvent.endTime}:00Z`
+              : `${subEvent.startDate}T${subEvent.startTime}:00Z`, // Si no hay fin, usar inicio
+            type: eventData.type,
+            privacy: eventData.privacy,
+            ticketType: "free", // Los sub-eventos son gratuitos por defecto
+            price: { amount: 0, currency: "COP" },
+            maxAttendees: eventData.maxAttendees,
+            categoriaId: eventData.categoriaId,
+            mainImages: [],
+            galleryImages: [],
+            videos: [],
+            documents: [],
+            otherData: {
+              ...eventData.otherData,
+              parentEventId: result.id, // Referencia al evento padre
+              isSubEvent: true
+            },
+            destacado: false,
+            permitirInscripciones: true,
+            fechaLimiteInscripcion: eventData.fechaLimiteInscripcion,
+            tags: []
+          };
+
           try {
-            // Validar que el sub-evento tenga los campos requeridos
-            if (!subEvent.name || !subEvent.startDate || !subEvent.startTime) {
-              console.warn(`Sub-evento ${subEvent.id} incompleto, saltando...`);
-              subEventErrors.push({
-                id: subEvent.id,
-                name: subEvent.name || 'Sin nombre',
-                error: "Sub-evento incompleto (falta nombre o fechas)"
-              });
-              setSubEventProgress(prev => ({ ...prev, failed: prev.failed + 1 }));
-              continue;
-            }
-            
-            // Preparar datos del sub-evento
-            const subEventData = {
-              title: subEvent.name,
-              description: subEvent.description || `Sub-evento de ${formData.eventName}`,
-              eventoPrincipalId: eventoPrincipalId,
-              location: {
-                address: formData.eventLocation, // Usar la misma ubicación del evento principal por defecto
-                type: formData.eventType === "inPerson" ? "presencial" : formData.eventType === "online" ? "online" : "híbrido",
-                latitude: formData.latitude,
-                longitude: formData.longitude
-              },
-              start: `${subEvent.startDate}T${subEvent.startTime}:00Z`,
-              end: subEvent.endDate && subEvent.endTime ? `${subEvent.endDate}T${subEvent.endTime}:00Z` : `${subEvent.startDate}T${subEvent.startTime}:00Z`, // Si no hay fin, usar inicio
-              type: "workshop", // Tipo por defecto para sub-eventos, ajustar si es necesario
-              privacy: "public",
-              ticketType: "free", // Por defecto gratuito, ajustar si es necesario
-              maxAttendees: Math.floor(parseInt(formData.capacity) / 2) || 10, // Default: mitad de capacidad o 10
-              mainImages: eventData.mainImages.slice(0, 1), // Usar la primera imagen del evento principal
-              otherData: {
-                organizer: formData.eventOrganizer,
-                contact: formData.contactPhone || "",
-                notes: `Sub-evento de ${formData.eventName}`
-              },
-              // Añadir categoriaId usando la categoría del evento principal
-              categoriaId: formData.eventCategory
-              // Añadir otros campos necesarios para sub-eventos según la API
-            };
-            
-            // Enviar sub-evento a la API
             const subEventResponse = await fetch(
-              "https://backendeventhub.onrender.com/api/subevents", // Asumiendo que el mismo endpoint crea sub-eventos si tiene eventoPrincipalId
+              "https://backendeventhub.onrender.com/api/events",
               {
                 method: "POST",
                 headers: {
@@ -1081,54 +1471,33 @@ const CreateEvent = () => {
                 body: JSON.stringify(subEventData),
               }
             );
-            
+
             if (!subEventResponse.ok) {
-              const subErrorText = await subEventResponse.text();
-              console.error(`Error al crear sub-evento ${subEvent.id}:`, subErrorText);
-              subEventErrors.push({
-                id: subEvent.id,
-                name: subEvent.name,
-                error: `Error ${subEventResponse.status}: ${subEventResponse.statusText}`
-              });
-              setSubEventProgress(prev => ({ ...prev, failed: prev.failed + 1 }));
-              continue;
+              console.error(`Error creando sub-evento ${i + 1}:`, await subEventResponse.text());
+              addNotification(`Error creando sub-evento "${subEvent.name}"`, "warning", 4000);
+            } else {
+              console.log(`Sub-evento ${i + 1} creado exitosamente`);
             }
-            
-            const subEventResult = await subEventResponse.json();
-            console.log(`Sub-evento ${subEvent.name} creado exitosamente:`, subEventResult);
-            subEventResults.push(subEventResult);
-            setSubEventProgress(prev => ({ ...prev, completed: prev.completed + 1 }));
-            
-          } catch (subError) {
-            console.error(`Error al procesar sub-evento ${subEvent.id}:`, subError);
-            subEventErrors.push({
-              id: subEvent.id,
-              name: subEvent.name,
-              error: subError.message
-            });
-            setSubEventProgress(prev => ({ ...prev, failed: prev.failed + 1 }));
+          } catch (subEventError) {
+            console.error(`Error creando sub-evento ${i + 1}:`, subEventError);
+            addNotification(`Error creando sub-evento "${subEvent.name}": ${subEventError.message}`, "warning", 4000);
           }
-        }
-        
-        // Mostrar resumen de creación de sub-eventos
-        console.log(`Resumen de sub-eventos: ${subEventResults.length} creados, ${subEventErrors.length} con errores`);
-        
-        // Si hay errores en sub-eventos pero el evento principal se creó, mostrar advertencia
-        if (subEventErrors.length > 0) {
-          console.warn("Algunos sub-eventos no pudieron ser creados:", subEventErrors);
-          alert(`El evento principal se creó correctamente, pero ${subEventErrors.length} sub-eventos no pudieron ser creados. Consulte la consola para más detalles.`);
         }
       }
 
-      // Redirigir a la página de detalles del evento principal
-      alert("¡Evento creado exitosamente!");
-      navigate(`/event/${eventoPrincipalId}`);
+      addNotification("¡Evento creado exitosamente!", "success", 5000);
       
+      // Redirigir después de un breve delay
+      setTimeout(() => {
+        navigate("/my-events");
+      }, 2000);
+
     } catch (error) {
-      console.error("Error al crear el evento:", error);
-      alert(`Error al crear el evento: ${error.message}`);
+      console.error("Error en handleSubmit:", error);
+      addNotification(`Error al crear el evento: ${error.message}`, "error", 6000);
     } finally {
       setIsLoading(false);
+      setSubEventProgress(null);
     }
   };
 
@@ -1357,7 +1726,7 @@ const CreateEvent = () => {
             
             <div className="mb-6">
               <h3 className="text-lg font-medium mb-4">
-                Galería de imágenes (mínimo 5) *
+                Galería de imágenes (opcional)
               </h3>
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 mb-4">
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -1550,7 +1919,7 @@ const CreateEvent = () => {
                   htmlFor="eventStartTime"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Hora de inicio *
+                  Hora de inicio * <span className="text-xs text-gray-500">(Formato: HH:MM)</span>
                 </label>
                 <input
                   type="time"
@@ -1602,7 +1971,7 @@ const CreateEvent = () => {
                   htmlFor="eventEndTime"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Hora de fin *
+                  Hora de fin * <span className="text-xs text-gray-500">(Formato: HH:MM)</span>
                 </label>
                 <input
                   type="time"
@@ -1620,6 +1989,10 @@ const CreateEvent = () => {
                 )}
               </div>
             </div>
+
+            {errors.timeRange && (
+              <p className="text-red-500 text-sm mt-4">{errors.timeRange}</p>
+            )}
           </div>
         );
 
@@ -1677,16 +2050,26 @@ const CreateEvent = () => {
                   htmlFor="contactPhone"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Teléfono de contacto (opcional)
+                  Teléfono de contacto (opcional) <span className="text-xs text-gray-500">(Formato automático)</span>
                 </label>
                 <input
                   type="tel"
                   id="contactPhone"
-                  className="w-full p-3 border border-gray-300 rounded-lg"
-                  placeholder="+57 123 456 7890"
+                  className={`w-full p-3 border rounded-lg ${
+                    errors.contactPhone ? "border-red-500" : "border-gray-300"
+                  }`}
+                  placeholder="3001234567 o +57 300 123 4567"
                   value={formData.contactPhone}
                   onChange={handleInputChange}
                 />
+                {errors.contactPhone && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.contactPhone}
+                  </p>
+                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  Formatos válidos: móvil colombiano (10 dígitos), fijo (7 dígitos), internacional
+                </p>
               </div>
             </div>
 
@@ -1803,7 +2186,7 @@ const CreateEvent = () => {
                 htmlFor="capacity"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Capacidad máxima *
+                Capacidad máxima * <span className="text-xs text-gray-500">(1 - 100,000 personas)</span>
               </label>
               <input
                 type="number"
@@ -1815,6 +2198,7 @@ const CreateEvent = () => {
                 value={formData.capacity}
                 onChange={handleInputChange}
                 min="1"
+                max="100000"
               />
               {errors.capacity && (
                 <p className="text-red-500 text-sm mt-1">{errors.capacity}</p>
@@ -1946,7 +2330,7 @@ const CreateEvent = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Hora de inicio *
+                          Hora de inicio * <span className="text-xs text-gray-500">(HH:MM)</span>
                         </label>
                         <input
                           type="time"
@@ -1986,7 +2370,7 @@ const CreateEvent = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Hora de fin (opcional)
+                          Hora de fin (opcional) <span className="text-xs text-gray-500">(HH:MM)</span>
                         </label>
                         <input
                           type="time"
@@ -2108,6 +2492,17 @@ const CreateEvent = () => {
                   </p>
                 </div>
 
+                {formData.contactPhone && (
+                  <div className="md:col-span-2">
+                    <p className="text-sm font-medium text-gray-700">
+                      Teléfono de contacto:
+                    </p>
+                    <p className="text-sm text-gray-900">
+                      {formData.contactPhone}
+                    </p>
+                  </div>
+                )}
+
                 {formData.additionalNotes && (
                   <div className="md:col-span-2">
                     <p className="text-sm font-medium text-gray-700">
@@ -2228,9 +2623,6 @@ const CreateEvent = () => {
                     style={{ width: `${(subEventProgress.current / subEventProgress.total) * 100}%` }}
                   ></div>
                 </div>
-                <p className="text-xs text-gray-600 mt-1">
-                  Completados: {subEventProgress.completed}, Fallidos: {subEventProgress.failed}
-                </p>
               </div>
             )}
           </div>
@@ -2243,6 +2635,7 @@ const CreateEvent = () => {
 
   return (
     <div className="create-event-page bg-gray-100 min-h-screen">
+      <NotificationContainer />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden">
           <div className="p-6 md:p-8">
